@@ -7,6 +7,13 @@
 
 import Foundation
 
+infix operator -=
+func -= (lhs: inout Time, rhs: Int) {
+    let totalMinutes = Int(lhs.minutes + lhs.hours * 60) - rhs
+    lhs.hours = UInt8((totalMinutes / 60) % 24)
+    lhs.minutes = UInt8(totalMinutes % 60)
+}
+
 struct Time: Hashable, Comparable, CustomStringConvertible {
     enum Error: Swift.Error {
         case invalidHour
@@ -17,7 +24,7 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
     var minutes: UInt8
     var description: String
     
-    init (hours: UInt8, minutes: UInt8) throws {
+    init(hours: UInt8, minutes: UInt8) throws {
         guard hours >= 0 && hours < 24 else {
             throw Error.invalidHour
         }
@@ -46,13 +53,20 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
         }
     }
     
-    mutating func add (hours: UInt8) {
+    mutating func add(hours: UInt8) {
         self.hours = (self.hours + hours) % 24
     }
     
-    mutating func add (minutes: UInt8) {
+    mutating func add(minutes: UInt8) {
         let extraHours = minutes / 60
         self.minutes += minutes % 60
         add(hours: extraHours)
+    }
+    
+    static func + (lhs: Time, rhs: Time) -> Time {
+        var finalTime = lhs
+        finalTime.hours += rhs.hours
+        finalTime.minutes += rhs.minutes
+        return finalTime
     }
 }

@@ -7,12 +7,13 @@
 
 import Foundation
 
-class User {
-    enum AgeGroup {
-        case adult
-        case child
-    }
-    
+
+enum AgeGroup {
+    case adult
+    case child
+}
+
+class User: Hashable, Equatable {
     enum Error: Swift.Error {
         case invalidMobileFormat
     }
@@ -32,12 +33,22 @@ class User {
     var rides: Dictionary<Ride, Bool> = [:]
     var refreshments: Array<Refreshment> = []
     private var isInside: Bool = false
-    var totalAmountSpent: Double = 0
+    var totalAmountSpent: Float {
+        get {
+            var sum: Float = 0
+            for (ride, isVisited) in rides {
+                if isVisited {
+                    sum += ride.cost
+                }
+            }
+            return sum
+        }
+    }
     
-    init (name: String, age: UInt8, mobile: String) throws {
+    init(name: String, age: UInt8, mobile: String) throws {
         self.name = name
         self.age = age
-        guard mobile.count != 10 else {
+        guard mobile.count == 10 else {
             throw Error.invalidMobileFormat
         }
         self.mobile = mobile
@@ -70,18 +81,62 @@ class User {
     }
     
     func canCheckOut() -> Bool {
-        
+        for (ride, isVisited) in rides {
+            if !isVisited && !ride.isUnderMaintenance() {
+                return false
+            }
+        }
+        return true
     }
     
-    func showReceipt() -> String {
-        
+    func showReceipt() {
+        for (ride, isVisited) in rides {
+            if isVisited {
+                print("\(ride.name)\t\t\(ride.cost)")
+            }
+        }
+        for refreshment in refreshments {
+            print("\(refreshment.name)\t\t\(refreshment.cost)")
+        }
+        print(repeatElement("-", count: 15))
+        print("Total:\t\t\(totalAmountSpent)")
     }
     
     func status() -> String {
-        
+        if isInside {
+            return "\(name) is inside."
+        } else {
+            return "\(name) is outside."
+        }
     }
     
     func visitRide(ride: Ride) throws {
-        
+        if rides[ride] == nil {
+            throw RideError.rideNotFound
+        } else if rides[ride] == true {
+            throw RideError.alreadyVisitedRide
+        } else {
+            rides[ride] = true
+            do {
+                try ride.start()
+            } catch RideError.StartError.rideClosed {
+                print("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
+            } catch RideError.StartError.rideUnderMaintenance {
+                print("Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.maintenanceDetails!)")
+            }
+        }
+        if canCheckOut() {
+            print("All rides visited!\nUser can check out.")
+        }
+    }
+    
+    static func == (lhs: User, rhs: User) -> Bool {
+        return lhs.name == rhs.name && lhs.age == rhs.age && lhs.mobile == rhs.mobile
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(mobile)
     }
 }
+

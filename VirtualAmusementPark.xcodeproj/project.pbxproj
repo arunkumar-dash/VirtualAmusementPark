@@ -13,6 +13,8 @@
 		1DA0F55A27048BDA00AE3A3E /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F55927048BDA00AE3A3E /* Time.swift */; };
 		1DA0F55C2704922400AE3A3E /* Timing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F55B2704922400AE3A3E /* Timing.swift */; };
 		1DA0F55E270496D400AE3A3E /* Refreshment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F55D270496D400AE3A3E /* Refreshment.swift */; };
+		1DA0F560270562E400AE3A3E /* Ride.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F55F270562E400AE3A3E /* Ride.swift */; };
+		1DA0F5622706A31400AE3A3E /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F5612706A31400AE3A3E /* Controller.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +37,8 @@
 		1DA0F55927048BDA00AE3A3E /* Time.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Time.swift; sourceTree = "<group>"; };
 		1DA0F55B2704922400AE3A3E /* Timing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timing.swift; sourceTree = "<group>"; };
 		1DA0F55D270496D400AE3A3E /* Refreshment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Refreshment.swift; sourceTree = "<group>"; };
+		1DA0F55F270562E400AE3A3E /* Ride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ride.swift; sourceTree = "<group>"; };
+		1DA0F5612706A31400AE3A3E /* Controller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +55,8 @@
 		1DA0F5422703290800AE3A3E = {
 			isa = PBXGroup;
 			children = (
+				1DA0F5612706A31400AE3A3E /* Controller.swift */,
+				1DA0F55F270562E400AE3A3E /* Ride.swift */,
 				1DA0F55D270496D400AE3A3E /* Refreshment.swift */,
 				1DA0F55B2704922400AE3A3E /* Timing.swift */,
 				1DA0F55927048BDA00AE3A3E /* Time.swift */,
@@ -141,6 +147,8 @@
 				1DA0F54F2703290800AE3A3E /* main.swift in Sources */,
 				1DA0F55627048A2900AE3A3E /* Reception.swift in Sources */,
 				1DA0F55827048BC000AE3A3E /* User.swift in Sources */,
+				1DA0F560270562E400AE3A3E /* Ride.swift in Sources */,
+				1DA0F5622706A31400AE3A3E /* Controller.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

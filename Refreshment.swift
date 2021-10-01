@@ -9,5 +9,5 @@ import Foundation
 
 struct Refreshment {
     let name: String
-    let cost: Double
+    let cost: Float
 }

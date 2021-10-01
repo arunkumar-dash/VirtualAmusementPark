@@ -17,12 +17,20 @@ struct Timing: CustomStringConvertible {
         case invalidTiming
     }
     
-    init (opening openingTime: Time, closing closingTime: Time) throws {
-        guard openingTime < closingTime else {
+    init(opening openingTime: Time, closing closingTime: Time) throws {
+        guard openingTime < closingTime && Timing.isValidTiming(time: openingTime) && Timing.isValidTiming(time: closingTime) else {
             throw Error.invalidTiming
         }
         self.openingTime = openingTime
         self.closingTime = closingTime
         description = "opening hours: \(openingTime.description) to \(closingTime.description)"
+    }
+    
+    static func isValidTiming(time: Time) -> Bool {
+        if time.hours < 24 && time.minutes < 60 {
+            return true
+        } else {
+            return false
+        }
     }
 }
