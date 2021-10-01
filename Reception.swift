@@ -118,7 +118,84 @@ struct Reception {
             }
         } while flag
         if user != nil {
+            user!.checkIn()
             users.insert(user!)
+        }
+    }
+    
+    func userController() {
+        var user: User? = nil
+        print("Attempting to login...")
+        let name = getInput("Enter name: ")
+        let mobile = getInput("Enter mobile: ")
+        let age = UInt8(getInput("Enter age: "))!
+        var tempUser: User? = nil
+        do {
+            tempUser = try User(name: name, age: age, mobile: mobile)
+            if tempUser != nil {
+                if let idx = users.firstIndex(of: tempUser!) {
+                    user = users[idx]
+                } else {
+                    print("Cannot find user")
+                    return
+                }
+            } else {
+                print("Login attempt failed!")
+                return
+            }
+        } catch let error {
+            print("Login fsiled!")
+            print(error)
+            return
+        }
+    userLoop:
+        while true {
+            print("[1] Visit ride")
+            print("[2] Buy refreshments")
+            print("[3] Check-out")
+            print("[4] Exit but don't check out")
+            let input = getInput()
+            if UInt8(input) == nil {
+                print("Invalid input!")
+                continue userLoop
+            }
+            switch UInt8(input)! {
+            case 1:
+                for ride in user!.rides {
+                    print(ride.key.description)
+                }
+                let rideName = getInput("Enter ride name: ")
+                for ride in user!.rides {
+                    if ride.key.name == rideName {
+                        DispatchQueue.global().async {
+                            do {
+                                try user!.visitRide(ride: ride.key)
+                            } catch let error {
+                                print(error)
+                            }
+                        }
+                    }
+                }
+            case 2:
+                for (idx, refreshment) in Reception.refreshments.enumerated() {
+                    print("[\(idx + 1)]\t\t\(refreshment.name)")
+                }
+                let idx = getInput()
+                if Int(idx) != nil && Int(idx)! < Reception.refreshments.count {
+                    user!.refreshments.append(Reception.refreshments[Int(idx)! - 1])
+                }  else {
+                    print("Invalid choice!")
+                }
+            case 3:
+                if user!.checkOut() == false {
+                    print("Checked out already!")
+                    break userLoop
+                }
+            case 4:
+                break userLoop
+            default:
+                print("Invalid selection!")
+            }
         }
     }
     

@@ -80,6 +80,10 @@ class User: Hashable, Equatable {
         }
     }
     
+    func add(refreshment: Refreshment) {
+        refreshments.append(refreshment)
+    }
+    
     func canCheckOut() -> Bool {
         for (ride, isVisited) in rides {
             if !isVisited && !ride.isUnderMaintenance() {
@@ -98,7 +102,7 @@ class User: Hashable, Equatable {
         for refreshment in refreshments {
             print("\(refreshment.name)\t\t\(refreshment.cost)")
         }
-        print(repeatElement("-", count: 15))
+        print(String(repeating: "-", count: 15))
         print("Total:\t\t\(totalAmountSpent)")
     }
     
@@ -118,11 +122,16 @@ class User: Hashable, Equatable {
         } else {
             rides[ride] = true
             do {
+                try ride.add(user: self)
                 try ride.start()
             } catch RideError.StartError.rideClosed {
                 print("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
             } catch RideError.StartError.rideUnderMaintenance {
                 print("Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.maintenanceDetails!)")
+            } catch RideError.rideFull {
+                print("Ride full!")
+            } catch RideError.userAlreadyInside {
+                print("User already inside!")
             }
         }
         if canCheckOut() {

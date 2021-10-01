@@ -8,6 +8,7 @@
 import Foundation
 
 struct Controller {
+    let operationQueue = OperationQueue()
     var reception = Reception()
     private func getInput(_ string: String = "") -> String {
         var input: String? = nil
@@ -71,25 +72,41 @@ struct Controller {
     }
     
     mutating func start() {
-        //async increment Reception.currentTime.minutes
+        //Increments one minute per second in currentTime
+        DispatchQueue.global().async {
+            while true {
+                sleep(1)
+                Reception.currentTime.add(minutes: 1)
+            }
+        }
+        mainLoop:
         while true {
-            print("[1] Check In")
-            print("[2] Check Out")
-            print("[3] Create ride")
+            print("[1] Create ride")
+            print("[2] Check-in")
+            print("[3] Check-out")
             print("[4] Add maintenance details")
             print("[5] Create refreshment")
+            print("[6] Enter as User")
+            print("[7] Check time")
+            print("[8] Stop")
             let input = getIntegerInput()
             switch input {
             case 1:
-                checkIn()
-            case 2:
-                checkOut()
-            case 3:
                 createRide()
+            case 2:
+                checkIn()
+            case 3:
+                checkOut()
             case 4:
                 addMaintenance()
             case 5:
                 createRefreshment()
+            case 6:
+                reception.userController()
+            case 7:
+                print("Current time: \(Reception.currentTime.description)")
+            case 8:
+                break mainLoop
             default:
                 print("Invalid choice!")
             }
@@ -148,10 +165,14 @@ struct Controller {
                     if index + 1 == maintenanceIdx {
                         Reception.rides[rideNumber - 1].maintenanceDetails = maintenanceType
                         var maintenanceDuration = getTimeInput("Enter maintenance duration: ")
-                        //async code to wait until duration ends
-                        maintenanceDuration -= 1
-                        //
-                        Reception.rides[rideNumber - 1].maintenanceDetails = nil
+                        //Maintenance work goes in background
+                        DispatchQueue.global().async {
+                            while maintenanceDuration.hours >= 0 && maintenanceDuration.minutes > 0 {
+                                sleep(1)
+                                maintenanceDuration -= 1
+                            }
+                            Reception.rides[rideNumber - 1].maintenanceDetails = nil
+                        }
                         break
                     }
                 }
