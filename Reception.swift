@@ -6,11 +6,16 @@
 //
 
 import Foundation
-
+/// Main entry to the amusement park.
+/// Contains instances of users entered into the park through this reception.
 struct Reception {
+    /// A set consisting of `User` instances.
     private var users: Set<User> = []
+    /// An array consisting of `User`s checked-out.
     private var usersLog: Array<User> = []
+    /// A static array consisting of rides in the park.
     static var rides: Array<Ride> = []
+    /// Static variable which stores the time since start of execution.
     static var currentTime: Time {
         get {
             do {
@@ -31,10 +36,14 @@ struct Reception {
             }
         }
     }
+    /// Static variable which utility for `currentTime`.
     static private var currentHour: UInt8 = 0
+    /// Static variable which utility for `currentTime`.
     static private var currentMinute: UInt8 = 0
+    /// A static array consisting of refreshments in the park.
     static var refreshments: Array<Refreshment> = []
     
+    /// Function that prints the available rides.
     @discardableResult
     func showAvailableRides() -> Bool{
         print("Available rides: ")
@@ -52,6 +61,7 @@ struct Reception {
         return true
     }
     
+    /// Function that prints the available rides even if it is currently running.
     @discardableResult
     func showAvailableRidesForMaintenance() -> Bool{
         print("Available rides: ")
@@ -69,6 +79,7 @@ struct Reception {
         return true
     }
     
+    /// Utility function for getting string input
     private func getInput(_ string: String = "") -> String {
         var input: String? = nil
         while input == nil {
@@ -78,6 +89,7 @@ struct Reception {
         return input!
     }
     
+    /// Mutating function used to add `User` objects into `users` set.
     mutating func checkIn() {
         var user: User? = nil
         print("Enter user details: ")
@@ -91,6 +103,7 @@ struct Reception {
         }
         userAge = UInt8(tempUserAge)!
         mobile = getInput("Enter mobile(without spaces): ")
+        /// Error handling mobile number
         while true {
             do {
                 user = try User(name: userName, age: userAge, mobile: mobile)
@@ -103,6 +116,7 @@ struct Reception {
                 return
             }
         }
+        /// Display available rides
         guard showAvailableRides() else {
             return
         }
@@ -142,6 +156,7 @@ struct Reception {
         }
     }
     
+    /// Function which allows users to login
     func userController() {
         var user: User? = nil
         print("Attempting to login...")
@@ -149,6 +164,7 @@ struct Reception {
         let mobile = getInput("Enter mobile: ")
         var tempUser: User? = nil
         do {
+            /// Creating temporary `User` instance to access in O(1) time
             tempUser = try User(name: name, age: 1, mobile: mobile)
             if tempUser != nil {
                 if let idx = users.firstIndex(of: tempUser!) {
@@ -167,6 +183,7 @@ struct Reception {
             return
         }
         print("Login success!")
+        /// Access options for user
     userLoop:
         while true {
             print("----- User Window -----")
@@ -229,6 +246,7 @@ struct Reception {
         }
     }
     
+    /// Function which removes `User` object from `users` and adds to `usersLog`.
     mutating func checkOut() {
         let name = getInput("Enter name: ")
         let mobile = getInput("Enter mobile: ")
@@ -250,6 +268,7 @@ struct Reception {
         }
     }
     
+    /// Prints `usersLog`.
     func showCheckedOutUsers() {
         if usersLog.isEmpty {
             print("No users found!")
@@ -260,6 +279,7 @@ struct Reception {
         }
     }
     
+    /// Prints `users`.
     func showCheckedInUsers() {
         if users.isEmpty {
             print("No users found!")
@@ -270,6 +290,7 @@ struct Reception {
         }
     }
     
+    /// Prints count of `users`
     func totalUsersCheckedIn() -> Int {
         return users.count
     }
