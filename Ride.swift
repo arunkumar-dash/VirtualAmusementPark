@@ -34,6 +34,7 @@ class Ride: Hashable, CustomStringConvertible {
     let minimumCapacity: UInt
     let maximumCapacity: UInt
     var maintenanceDetails: Maintenance?
+    var currentlyRunning: Bool = false
     
     var description: String
     
@@ -57,9 +58,6 @@ class Ride: Hashable, CustomStringConvertible {
     }
     
     func isOpen() -> Bool {
-        if isUnderMaintenance() {
-            return false
-        }
         let currentTime = Reception.currentTime
         if ((currentTime + duration) <= timing.closingTime) && (currentTime > timing.openingTime) {
             return true
@@ -69,29 +67,50 @@ class Ride: Hashable, CustomStringConvertible {
     }
     
     func start() throws {
-        if isOpen() == false && isUnderMaintenance() == false {
+        if currentlyRunning {
+            print("Ride is currently running!")
+            print("Users inside: ")
+            for user in usersInside {
+                print(user.name, terminator: ", ")
+            }
+            print("")
+            return
+        }
+        while usersInside.count < minimumCapacity {
+            print("Waiting for Users...")
+            sleep(10)
+        }
+        print("Ride \(self.name) started...")
+        currentlyRunning = true
+        for _ in 1...(duration.hours * 60 + duration.minutes) {
+            if isUnderMaintenance() {
+                break
+            }
+            sleep(1)
+        }
+        print("Ride \(self.name) stopped...")
+        currentlyRunning = false
+        for user in usersInside {
+            user.visitingRide = nil
+        }
+        usersInside.removeAll()
+    }
+    
+    func add(user: User) throws {
+        if isOpen() == false {
             throw RideError.StartError.rideClosed
         }
         if isUnderMaintenance() {
             throw RideError.StartError.rideUnderMaintenance
         }
-        while usersInside.count < minimumCapacity {
-            print("Waiting for Users...")
-            sleep(5)
-        }
-        print("Ride \(self.name) started...")
-        sleep(UInt32(duration.hours*60) + UInt32(duration.minutes))
-        print("Ride \(self.name) stopped...")
-        usersInside.removeAll()
-    }
-    
-    func add(user: User) throws {
+        user.visitingRide = self
         if usersInside.count == maximumCapacity {
             throw RideError.rideFull
         }
         guard usersInside.insert(user).inserted else {
             throw RideError.userAlreadyInside
         }
+        print("User: \(user.name) onboarded in \(self.name).")
     }
     
     static func == (lhs: Ride, rhs: Ride) -> Bool {

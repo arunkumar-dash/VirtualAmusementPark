@@ -40,7 +40,24 @@ struct Reception {
         print("Available rides: ")
         var availableRidesCount = 0
         for (count, ride) in Reception.rides.enumerated() {
-            if !ride.isUnderMaintenance() {
+            if ride.isUnderMaintenance() == false && ride.currentlyRunning == false {
+                print("[\(count + 1)]\t\(ride.description)")
+                availableRidesCount += 1
+            }
+        }
+        guard availableRidesCount > 0 else {
+            print("No rides available!")
+            return false
+        }
+        return true
+    }
+    
+    @discardableResult
+    func showAvailableRidesForMaintenance() -> Bool{
+        print("Available rides: ")
+        var availableRidesCount = 0
+        for (count, ride) in Reception.rides.enumerated() {
+            if ride.isUnderMaintenance() == false {
                 print("[\(count + 1)]\t\(ride.description)")
                 availableRidesCount += 1
             }
@@ -98,10 +115,12 @@ struct Reception {
                     if currentRide.isUnderMaintenance() {
                         print("Ride not available!")
                     } else if user != nil {
-                        if user!.add(ride: currentRide) {
-                            print("Ride added successfully!")
-                        } else {
-                            print("Ride already added!")
+                        do {
+                            if try user!.add(ride: currentRide) {
+                                print("Ride added successfully!")
+                            }
+                        } catch let error {
+                            print(error)
                         }
                     } else {
                         print("User doesn't exist!")
@@ -128,10 +147,9 @@ struct Reception {
         print("Attempting to login...")
         let name = getInput("Enter name: ")
         let mobile = getInput("Enter mobile: ")
-        let age = UInt8(getInput("Enter age: "))!
         var tempUser: User? = nil
         do {
-            tempUser = try User(name: name, age: age, mobile: mobile)
+            tempUser = try User(name: name, age: 1, mobile: mobile)
             if tempUser != nil {
                 if let idx = users.firstIndex(of: tempUser!) {
                     user = users[idx]
@@ -144,12 +162,14 @@ struct Reception {
                 return
             }
         } catch let error {
-            print("Login fsiled!")
+            print("Login failed!")
             print(error)
             return
         }
+        print("Login success!")
     userLoop:
         while true {
+            print("----- User Window -----")
             print("[1] Visit ride")
             print("[2] Buy refreshments")
             print("[3] Check-out")
@@ -165,6 +185,7 @@ struct Reception {
                     print(ride.key.description)
                 }
                 let rideName = getInput("Enter ride name: ")
+                var isValid = true
                 for ride in user!.rides {
                     if ride.key.name == rideName {
                         DispatchQueue.global().async {
@@ -174,14 +195,23 @@ struct Reception {
                                 print(error)
                             }
                         }
+                        isValid = false
+                        break userLoop
                     }
                 }
+                if isValid {
+                    print("Ride not available!")
+                }
             case 2:
+                if Reception.refreshments.isEmpty {
+                    print("No refreshments available!")
+                    break userLoop
+                }
                 for (idx, refreshment) in Reception.refreshments.enumerated() {
                     print("[\(idx + 1)]\t\t\(refreshment.name)")
                 }
-                let idx = getInput()
-                if Int(idx) != nil && Int(idx)! < Reception.refreshments.count {
+                let idx = getInput("Enter refreshment number: ")
+                if Int(idx) != nil && Int(idx)! <= Reception.refreshments.count && Int(idx)! > 0{
                     user!.refreshments.append(Reception.refreshments[Int(idx)! - 1])
                 }  else {
                     print("Invalid choice!")
@@ -202,17 +232,18 @@ struct Reception {
     mutating func checkOut() {
         let name = getInput("Enter name: ")
         let mobile = getInput("Enter mobile: ")
-        let age = UInt8(getInput("Enter age: "))!
         var tempUser: User? = nil
         do {
-            tempUser = try User(name: name, age: age, mobile: mobile)
+            tempUser = try User(name: name, age: 1, mobile: mobile)
             if tempUser != nil {
-                tempUser!.showReceipt()
-                if users.remove(tempUser!) == nil {
-                    print("User doesn't exist!")
+                if let oldUser = users.remove(tempUser!) {
+                    oldUser.showReceipt()
+                    usersLog.append(oldUser)
                 } else {
-                    usersLog.append(tempUser!)
+                    print("User doesn't exist!")
                 }
+            } else {
+                print("Invalid details!")
             }
         } catch let error {
             print(error)
@@ -220,12 +251,20 @@ struct Reception {
     }
     
     func showCheckedOutUsers() {
+        if usersLog.isEmpty {
+            print("No users found!")
+            return
+        }
         for oldUser in usersLog {
             print("Name: \(oldUser.name)\t\tAge: \(oldUser.age)\t\tMobile: \(oldUser.mobile)")
         }
     }
     
     func showCheckedInUsers() {
+        if users.isEmpty {
+            print("No users found!")
+            return
+        }
         for user in users {
             print("Name: \(user.name)\t\tAge: \(user.age)\t\tMobile: \(user.mobile)")
         }

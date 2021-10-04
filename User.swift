@@ -16,6 +16,10 @@ enum AgeGroup {
 class User: Hashable, Equatable {
     enum Error: Swift.Error {
         case invalidMobileFormat
+        enum UserError: Swift.Error {
+            case ageGroupUnsatisfied
+            case rideAlreadyAdded
+        }
     }
     
     let name: String
@@ -33,6 +37,7 @@ class User: Hashable, Equatable {
     var rides: Dictionary<Ride, Bool> = [:]
     var refreshments: Array<Refreshment> = []
     private var isInside: Bool = false
+    var visitingRide: Ride? = nil
     var totalAmountSpent: Float {
         get {
             var sum: Float = 0
@@ -72,11 +77,15 @@ class User: Hashable, Equatable {
     }
     
     @discardableResult
-    func add(ride: Ride) -> Bool{
+    func add(ride: Ride) throws -> Bool {
+        if ageGroup == .child && ride.allowedAgeGroup == .adult {
+            print("Not allowed")
+            throw Error.UserError.ageGroupUnsatisfied
+        }
         if rides.updateValue(false, forKey: ride) == nil {
             return true
         } else {
-            return false
+            throw Error.UserError.rideAlreadyAdded
         }
     }
     
@@ -115,6 +124,10 @@ class User: Hashable, Equatable {
     }
     
     func visitRide(ride: Ride) throws {
+        if visitingRide != nil {
+            print("You are currently in \(visitingRide!.name), visit after ride ends!")
+            return
+        }
         if rides[ride] == nil {
             throw RideError.rideNotFound
         } else if rides[ride] == true {
@@ -135,12 +148,12 @@ class User: Hashable, Equatable {
             }
         }
         if canCheckOut() {
-            print("All rides visited!\nUser can check out.")
+            print("All rides visited!\nUser \(name) can check out.")
         }
     }
     
     static func == (lhs: User, rhs: User) -> Bool {
-        return lhs.name == rhs.name && lhs.age == rhs.age && lhs.mobile == rhs.mobile
+        return lhs.name == rhs.name && lhs.mobile == rhs.mobile
     }
     
     func hash(into hasher: inout Hasher) {

@@ -58,15 +58,15 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
     }
     
     mutating func add(minutes: UInt8) {
-        let extraHours = minutes / 60
-        self.minutes += minutes % 60
+        let extraHours = (self.minutes + minutes) / 60
+        self.minutes = (self.minutes + minutes) % 60
         add(hours: extraHours)
     }
     
     static func + (lhs: Time, rhs: Time) -> Time {
         var finalTime = lhs
-        finalTime.hours += rhs.hours
-        finalTime.minutes += rhs.minutes
+        finalTime.add(hours: rhs.hours)
+        finalTime.add(minutes: rhs.minutes)
         return finalTime
     }
 }
