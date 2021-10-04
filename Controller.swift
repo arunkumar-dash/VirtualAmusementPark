@@ -173,17 +173,22 @@ struct Controller {
                 }
                 for (index, maintenanceType) in Maintenance.allCases.enumerated() {
                     if index + 1 == maintenanceIdx {
-                        Reception.rides[rideNumber - 1].maintenanceDetails = maintenanceType
                         var maintenanceDuration = getTimeInput("Enter maintenance duration: ")
                         print("Ride \(currentRide.name) is under maintenance for \(maintenanceDuration.hours) hours and \(maintenanceDuration.minutes) minutes due to \(maintenanceType)!")
-                        //Maintenance work goes in background
-                        operationQueue.addOperation {
-                            while maintenanceDuration.hours >= 0 && maintenanceDuration.minutes > 0 {
-                                sleep(1)
-                                maintenanceDuration -= 1
+                        Reception.rides[rideNumber - 1].maintenanceDetails = maintenanceType
+                        do {
+                            let defaultTime = try Time(hours: 0, minutes: 0)
+                            ///Maintenance work goes in background
+                            DispatchQueue(label: "Maintenance").async {
+                                while maintenanceDuration > defaultTime {
+                                    sleep(1)
+                                    maintenanceDuration -= 1
+                                }
+                                Reception.rides[rideNumber - 1].maintenanceDetails = nil
+                                print("Maintenance work for ride \(currentRide.name) is over!")
                             }
-                            Reception.rides[rideNumber - 1].maintenanceDetails = nil
-                            print("Maintenance work for ride \(currentRide.name) is over!")
+                        } catch {
+                            print("Time error")
                         }
                         break
                     }

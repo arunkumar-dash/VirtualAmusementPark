@@ -104,8 +104,11 @@ class User: Hashable, Equatable {
     
     func showReceipt() {
         for (ride, isVisited) in rides {
-            if isVisited {
-                print("\(ride.name)\t\t\(ride.cost)")
+            if ride.isUnderMaintenance() == false {
+                print("\(ride.name)\t\t\(ride.cost)", terminator: " ")
+                if isVisited == false {
+                    print("- Ride wasn't visited!")
+                }
             }
         }
         for refreshment in refreshments {
@@ -133,10 +136,10 @@ class User: Hashable, Equatable {
         } else if rides[ride] == true {
             throw RideError.alreadyVisitedRide
         } else {
-            rides[ride] = true
             do {
                 try ride.add(user: self)
                 try ride.start()
+                rides[ride] = true
             } catch RideError.StartError.rideClosed {
                 print("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
             } catch RideError.StartError.rideUnderMaintenance {

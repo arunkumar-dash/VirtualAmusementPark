@@ -53,6 +53,19 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
         }
     }
     
+    static func > (lhs: Time, rhs: Time) -> Bool {
+        if lhs.hours > rhs.hours {
+            return true
+        } else if lhs.hours == rhs.hours {
+            if lhs.minutes > rhs.minutes {
+                return true
+            }
+            return false
+        } else {
+            return false
+        }
+    }
+    
     mutating func add(hours: UInt8) {
         self.hours = (self.hours + hours) % 24
     }
