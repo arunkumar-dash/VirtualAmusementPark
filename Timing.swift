@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Returns a `Timing` object consisting of `openingTime` and `closingTime` `Time` objects
 struct Timing: CustomStringConvertible {
     var description: String
     
@@ -26,6 +27,7 @@ struct Timing: CustomStringConvertible {
         description = "opening hours: \(openingTime.description) to \(closingTime.description)"
     }
     
+    /// Static function to check if the `Timing` is valid after modification
     static func isValidTiming(time: Time) -> Bool {
         if time.hours < 24 && time.minutes < 60 {
             return true

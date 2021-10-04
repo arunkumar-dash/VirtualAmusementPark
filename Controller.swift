@@ -6,10 +6,12 @@
 //
 
 import Foundation
-
+/// Returns a controller object to handle the execution of the amusement park.
 struct Controller {
     let operationQueue = OperationQueue()
+    /// `Reception` object for performing operations in the park.
     var reception = Reception()
+    /// Helper function for getting `String` input
     private func getInput(_ string: String = "") -> String {
         var input: String? = nil
         while input == nil {
@@ -18,7 +20,7 @@ struct Controller {
         }
         return input!
     }
-
+    /// Helper function for getting `Int` input
     private func getIntegerInput(_ string: String = "") -> UInt {
         var input: String? = nil
         while input == nil || UInt(input!) == nil {
@@ -27,7 +29,7 @@ struct Controller {
         }
         return UInt(input!)!
     }
-
+    /// Helper function for getting `Float` input
     private func getFloatInput(_ string: String = "") -> Float {
         var input: String? = nil
         while input == nil || Float(input!) == nil {
@@ -36,7 +38,7 @@ struct Controller {
         }
         return Float(input!)!
     }
-
+    /// Helper function for getting `Time` input
     private func getTimeInput(_ string: String = "") -> Time {
         while true {
             print(string)
@@ -67,7 +69,7 @@ struct Controller {
             }
         }
     }
-
+    /// Helper function for getting `Timing` input
     private func getTimingInput(_ string: String = "") -> Timing {
         while true {
             do {
@@ -82,9 +84,9 @@ struct Controller {
             }
         }
     }
-    
+    /// Function to create timer and directing user towards the operations present.
     mutating func start() {
-        //Increments one minute per second in currentTime
+        ///Increments one minute per second in `currentTime`
         DispatchQueue.global().async {
             while true {
                 sleep(1)
@@ -128,7 +130,7 @@ struct Controller {
             }
         }
     }
-
+    /// Function to create a `Ride` object and append to `rides` array in `Reception`
     func createRide() {
         let name = getInput("Enter name: ")
         let cost = getFloatInput("Enter cost: ")
@@ -151,7 +153,7 @@ struct Controller {
         Reception.rides.append(Ride(name: name, cost: cost, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minCapacity, maximumCapacity: maxCapacity))
         print("Ride \(name) created!")
     }
-    
+    /// Function to add maintenance for a specific `Ride` object
     func addMaintenance() {
         guard reception.showAvailableRidesForMaintenance() else {
             return
@@ -159,6 +161,7 @@ struct Controller {
         let rideNumber = Int(getIntegerInput("Enter ride number: "))
         if rideNumber <= Reception.rides.count && rideNumber > 0 {
             let currentRide = Reception.rides[rideNumber - 1]
+            /// Checks if the ride is currently under maintenance
             if currentRide.isUnderMaintenance() {
                 print("Ride is already under maintenance!")
             } else {
@@ -198,7 +201,7 @@ struct Controller {
             print("Invalid ride number!")
         }
     }
-    
+    /// Function to create a `Refreshment` object and append to `refreshments` array
     func createRefreshment() {
         print("Enter refreshment details: ")
         let name = getInput("Enter name: ")

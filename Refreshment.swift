@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+/// Returns a refreshment object
 struct Refreshment {
     let name: String
     let cost: Float

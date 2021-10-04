@@ -7,13 +7,14 @@
 
 import Foundation
 
+/// Overloaded `-=` operator for `Time` and `Int`
 infix operator -=
 func -= (lhs: inout Time, rhs: Int) {
     let totalMinutes = Int(lhs.minutes + lhs.hours * 60) - rhs
     lhs.hours = UInt8((totalMinutes / 60) % 24)
     lhs.minutes = UInt8(totalMinutes % 60)
 }
-
+/// Returns a `Time` object consisting of hours, minutes
 struct Time: Hashable, Comparable, CustomStringConvertible {
     enum Error: Swift.Error {
         case invalidHour
@@ -35,11 +36,11 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
         self.minutes = minutes
         description = "\(hours):\(minutes)"
     }
-    
+    /// Overloaded `==` operator for two `Time` objects
     static func == (lhs: Time, rhs: Time) -> Bool {
         return lhs.hours == rhs.hours && lhs.minutes == rhs.minutes
     }
-    
+    /// Overloaded `<` operator for two `Time` objects
     static func < (lhs: Time, rhs: Time) -> Bool {
         if lhs.hours < rhs.hours {
             return true
@@ -52,7 +53,7 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
             return false
         }
     }
-    
+    /// Overloaded `>` operator for two `Time` objects
     static func > (lhs: Time, rhs: Time) -> Bool {
         if lhs.hours > rhs.hours {
             return true
@@ -65,17 +66,17 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
             return false
         }
     }
-    
+    /// Function to add `hours` to the `Time` object
     mutating func add(hours: UInt8) {
         self.hours = (self.hours + hours) % 24
     }
-    
+    /// Function to add `minutes` to the `Time` object
     mutating func add(minutes: UInt8) {
         let extraHours = (self.minutes + minutes) / 60
         self.minutes = (self.minutes + minutes) % 60
         add(hours: extraHours)
     }
-    
+    /// Overloaded `+` operator for two `Time` objects
     static func + (lhs: Time, rhs: Time) -> Time {
         var finalTime = lhs
         finalTime.add(hours: rhs.hours)

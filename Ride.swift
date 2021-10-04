@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Possible Errors while operating `Ride`
 enum RideError: Error {
     case rideNotFound
     enum StartError: Error {
@@ -17,22 +18,24 @@ enum RideError: Error {
     case userAlreadyInside
     case alreadyVisitedRide
 }
-
+/// Maintenance types as Enumeration
 enum Maintenance: CaseIterable {
     case watersShortage
     case powerOutage
     case wornOut
 }
-
+/// Returns a `Ride` object
 class Ride: Hashable, CustomStringConvertible {
     let name: String
     let cost: Float
     let duration: Time
     let timing: Timing
     let allowedAgeGroup: AgeGroup
+    /// Set consisting of `User` instances inside this `Ride`
     var usersInside: Set<User> = []
     let minimumCapacity: UInt
     let maximumCapacity: UInt
+    /// Consists of `Maintenance` object in case the ride is under maintenance
     var maintenanceDetails: Maintenance?
     var currentlyRunning: Bool = false
     
@@ -48,7 +51,7 @@ class Ride: Hashable, CustomStringConvertible {
         self.maximumCapacity = maximumCapacity
         description = "\(name)\t$\(cost)\t\(allowedAgeGroup)"
     }
-    
+    /// Function to check if the ride is under maintenance
     func isUnderMaintenance() -> Bool {
         if maintenanceDetails == nil {
             return false
@@ -56,7 +59,7 @@ class Ride: Hashable, CustomStringConvertible {
             return true
         }
     }
-    
+    /// Function to check the `timing` with `currentTime`
     func isOpen() -> Bool {
         let currentTime = Reception.currentTime
         if ((currentTime + duration) <= timing.closingTime) && (currentTime > timing.openingTime) {
@@ -65,7 +68,7 @@ class Ride: Hashable, CustomStringConvertible {
             return false
         }
     }
-    
+    /// Function to start the ride
     func start() throws {
         if currentlyRunning {
             print("Ride is currently running!")
@@ -76,12 +79,14 @@ class Ride: Hashable, CustomStringConvertible {
             print("")
             return
         }
+        /// Waiting until `usersInside` reach the `minimumCapacity`
         while usersInside.count < minimumCapacity {
             print("Waiting for Users...")
             sleep(10)
         }
         print("Ride \(self.name) started...")
         currentlyRunning = true
+        /// Running the ride
         for _ in 1...(duration.hours * 60 + duration.minutes) {
             if isUnderMaintenance() {
                 break
@@ -90,12 +95,13 @@ class Ride: Hashable, CustomStringConvertible {
         }
         print("Ride \(self.name) stopped...")
         currentlyRunning = false
+        /// Removing `User` instances from the `Ride`
         for user in usersInside {
             user.visitingRide = nil
         }
         usersInside.removeAll()
     }
-    
+    /// Function to add `User` object to the ride
     func add(user: User) throws {
         if isOpen() == false {
             throw RideError.StartError.rideClosed
@@ -112,11 +118,11 @@ class Ride: Hashable, CustomStringConvertible {
         }
         print("User: \(user.name) onboarded in \(self.name).")
     }
-    
+    /// Overloaded `==` operator for two `Ride` objects
     static func == (lhs: Ride, rhs: Ride) -> Bool {
         return lhs.name == rhs.name
     }
-    
+    /// Hash function involving only `name`
     func hash(into hasher: inout Hasher) {
         hasher.combine(self.name)
     }

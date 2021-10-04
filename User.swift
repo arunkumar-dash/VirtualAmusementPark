@@ -7,13 +7,14 @@
 
 import Foundation
 
-
+/// Enumeration for specific age categories
 enum AgeGroup {
     case adult
     case child
 }
-
+/// Returns an `User` instance
 class User: Hashable, Equatable {
+    /// Enumeration consisting of Errors possible due to user input
     enum Error: Swift.Error {
         case invalidMobileFormat
         enum UserError: Swift.Error {
@@ -24,6 +25,7 @@ class User: Hashable, Equatable {
     
     let name: String
     let age: UInt8
+    /// Computed property of `AgeGroup` type
     var ageGroup: AgeGroup {
         get {
             if age < 18 {
@@ -34,10 +36,15 @@ class User: Hashable, Equatable {
         }
     }
     let mobile: String
+    /// Dictionary to check if the user has visited the ride
     var rides: Dictionary<Ride, Bool> = [:]
+    /// Array consisting of `Refreshment` objects
     var refreshments: Array<Refreshment> = []
+    /// Helper variable which stores the status of the `User`
     private var isInside: Bool = false
+    /// Stores the `Ride` instance which is currently being visited by the `User`
     var visitingRide: Ride? = nil
+    /// Computed property which returns the total amount spent by the user.
     var totalAmountSpent: Float {
         get {
             var sum: Float = 0
@@ -58,7 +65,7 @@ class User: Hashable, Equatable {
         }
         self.mobile = mobile
     }
-    
+    /// Function which checks-in the user into the park.
     @discardableResult
     func checkIn() -> Bool {
         if isInside {
@@ -67,7 +74,7 @@ class User: Hashable, Equatable {
         isInside = true
         return isInside
     }
-    
+    /// Function which checks-out the user from the park.
     func checkOut() -> Bool {
         if !isInside {
             return false
@@ -75,7 +82,7 @@ class User: Hashable, Equatable {
         isInside = false
         return true
     }
-    
+    /// Function to add a `Ride` object to the collection.
     @discardableResult
     func add(ride: Ride) throws -> Bool {
         if ageGroup == .child && ride.allowedAgeGroup == .adult {
@@ -88,11 +95,11 @@ class User: Hashable, Equatable {
             throw Error.UserError.rideAlreadyAdded
         }
     }
-    
+    /// Function to add a `Refreshment` object to the collection.
     func add(refreshment: Refreshment) {
         refreshments.append(refreshment)
     }
-    
+    /// Boolean function to check if a user can check-out
     func canCheckOut() -> Bool {
         for (ride, isVisited) in rides {
             if !isVisited && !ride.isUnderMaintenance() {
@@ -101,7 +108,7 @@ class User: Hashable, Equatable {
         }
         return true
     }
-    
+    /// Prints a receipt listing the amount spent
     func showReceipt() {
         for (ride, isVisited) in rides {
             if ride.isUnderMaintenance() == false {
@@ -117,7 +124,7 @@ class User: Hashable, Equatable {
         print(String(repeating: "-", count: 15))
         print("Total:\t\t\(totalAmountSpent)")
     }
-    
+    /// Returns the value of `isInside`
     func status() -> String {
         if isInside {
             return "\(name) is inside."
@@ -125,7 +132,7 @@ class User: Hashable, Equatable {
             return "\(name) is outside."
         }
     }
-    
+    /// Function to visit a `Ride`
     func visitRide(ride: Ride) throws {
         if visitingRide != nil {
             print("You are currently in \(visitingRide!.name), visit after ride ends!")
@@ -138,7 +145,9 @@ class User: Hashable, Equatable {
         } else {
             do {
                 try ride.add(user: self)
+                /// Starts the ride to function
                 try ride.start()
+                /// Marking the ride as visited.
                 rides[ride] = true
             } catch RideError.StartError.rideClosed {
                 print("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
@@ -154,11 +163,11 @@ class User: Hashable, Equatable {
             print("All rides visited!\nUser \(name) can check out.")
         }
     }
-    
+    /// Overloaded `==` operator for two `User` objects
     static func == (lhs: User, rhs: User) -> Bool {
         return lhs.name == rhs.name && lhs.mobile == rhs.mobile
     }
-    
+    /// Hash function involving only `name` and `mobile`
     func hash(into hasher: inout Hasher) {
         hasher.combine(name)
         hasher.combine(mobile)
