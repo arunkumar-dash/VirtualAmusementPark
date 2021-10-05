@@ -124,7 +124,7 @@ struct Reception {
         repeat {
             let rideNumber = getInput("Enter ride number: ")
             if let index = Int(rideNumber) {
-                if index <= Reception.rides.count {
+                if index <= Reception.rides.count && index > 0 {
                     let currentRide = Reception.rides[index - 1]
                     if currentRide.isUnderMaintenance() {
                         print("Ride not available!")

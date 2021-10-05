@@ -10,7 +10,7 @@ import Foundation
 /// Overloaded `-=` operator for `Time` and `Int`
 infix operator -=
 func -= (lhs: inout Time, rhs: Int) {
-    let totalMinutes = Int(lhs.minutes + lhs.hours * 60) - rhs
+    let totalMinutes = Int(lhs.minutes) + Int(lhs.hours) * 60 - rhs
     lhs.hours = UInt8((totalMinutes / 60) % 24)
     lhs.minutes = UInt8(totalMinutes % 60)
 }

@@ -186,7 +186,7 @@ struct Controller {
                                     maintenanceDuration -= 1
                                 }
                                 Reception.rides[rideNumber - 1].maintenanceDetails = nil
-                                print("Maintenance work for ride \(currentRide.name) is over!")
+                                print("[Maintenance work for ride \(currentRide.name) is over!]")
                             }
                         } catch {
                             print("Time error")

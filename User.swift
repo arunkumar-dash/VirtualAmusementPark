@@ -116,6 +116,7 @@ class User {
                 if isVisited == false {
                     print("- Ride wasn't visited!")
                 }
+                print("")
             }
         }
         for refreshment in refreshments {
@@ -135,7 +136,7 @@ class User {
     /// Function to visit a `Ride`
     func visitRide(ride: Ride) throws {
         if visitingRide != nil {
-            print("You are currently in \(visitingRide!.name), visit after ride ends!")
+            print("[You are currently in \(visitingRide!.name), visit after ride ends!]")
             return
         }
         if rides[ride] == nil {
@@ -150,17 +151,17 @@ class User {
                 /// Marking the ride as visited.
                 rides[ride] = true
             } catch RideError.StartError.rideClosed {
-                print("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
+                print("[Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)]")
             } catch RideError.StartError.rideUnderMaintenance {
-                print("Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.maintenanceDetails!)")
+                print("[Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.maintenanceDetails!)]")
             } catch RideError.rideFull {
-                print("Ride full!")
+                print("[Ride full!]")
             } catch RideError.userAlreadyInside {
-                print("User already inside!")
+                print("[User already inside!]")
             }
         }
         if canCheckOut() {
-            print("All rides visited!\nUser \(name) can check out.")
+            print("[All rides visited!\nUser \(name) can check out.]")
         }
     }
 }

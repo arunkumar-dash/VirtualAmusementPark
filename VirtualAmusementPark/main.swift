@@ -8,5 +8,5 @@
 
 import Foundation
 
-//var controller = Controller()
-//controller.start()
+var controller = Controller()
+controller.start()
