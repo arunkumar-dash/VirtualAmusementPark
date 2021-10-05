@@ -13,7 +13,7 @@ enum AgeGroup {
     case child
 }
 /// Returns an `User` instance
-class User: Hashable, Equatable {
+class User {
     /// Enumeration consisting of Errors possible due to user input
     enum Error: Swift.Error {
         case invalidMobileFormat
@@ -43,7 +43,7 @@ class User: Hashable, Equatable {
     /// Helper variable which stores the status of the `User`
     private var isInside: Bool = false
     /// Stores the `Ride` instance which is currently being visited by the `User`
-    var visitingRide: Ride? = nil
+    var visitingRide: Ride?
     /// Computed property which returns the total amount spent by the user.
     var totalAmountSpent: Float {
         get {
@@ -163,14 +163,19 @@ class User: Hashable, Equatable {
             print("All rides visited!\nUser \(name) can check out.")
         }
     }
+}
+
+extension User: Equatable {
     /// Overloaded `==` operator for two `User` objects
     static func == (lhs: User, rhs: User) -> Bool {
         return lhs.name == rhs.name && lhs.mobile == rhs.mobile
     }
+}
+
+extension User: Hashable {
     /// Hash function involving only `name` and `mobile`
     func hash(into hasher: inout Hasher) {
         hasher.combine(name)
         hasher.combine(mobile)
     }
 }
-

@@ -15,7 +15,7 @@ func -= (lhs: inout Time, rhs: Int) {
     lhs.minutes = UInt8(totalMinutes % 60)
 }
 /// Returns a `Time` object consisting of hours, minutes
-struct Time: Hashable, Comparable, CustomStringConvertible {
+struct Time: Hashable, CustomStringConvertible {
     enum Error: Swift.Error {
         case invalidHour
         case invalidMinute
@@ -36,6 +36,26 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
         self.minutes = minutes
         description = "\(hours):\(minutes)"
     }
+    /// Function to add `hours` to the `Time` object
+    mutating func add(hours: UInt8) {
+        self.hours = (self.hours + hours) % 24
+    }
+    /// Function to add `minutes` to the `Time` object
+    mutating func add(minutes: UInt8) {
+        let extraHours = (self.minutes + minutes) / 60
+        self.minutes = (self.minutes + minutes) % 60
+        add(hours: extraHours)
+    }
+    /// Overloaded `+` operator for two `Time` objects
+    static func + (lhs: Time, rhs: Time) -> Time {
+        var finalTime = lhs
+        finalTime.add(hours: rhs.hours)
+        finalTime.add(minutes: rhs.minutes)
+        return finalTime
+    }
+}
+
+extension Time: Comparable {
     /// Overloaded `==` operator for two `Time` objects
     static func == (lhs: Time, rhs: Time) -> Bool {
         return lhs.hours == rhs.hours && lhs.minutes == rhs.minutes
@@ -65,22 +85,5 @@ struct Time: Hashable, Comparable, CustomStringConvertible {
         } else {
             return false
         }
-    }
-    /// Function to add `hours` to the `Time` object
-    mutating func add(hours: UInt8) {
-        self.hours = (self.hours + hours) % 24
-    }
-    /// Function to add `minutes` to the `Time` object
-    mutating func add(minutes: UInt8) {
-        let extraHours = (self.minutes + minutes) / 60
-        self.minutes = (self.minutes + minutes) % 60
-        add(hours: extraHours)
-    }
-    /// Overloaded `+` operator for two `Time` objects
-    static func + (lhs: Time, rhs: Time) -> Time {
-        var finalTime = lhs
-        finalTime.add(hours: rhs.hours)
-        finalTime.add(minutes: rhs.minutes)
-        return finalTime
     }
 }

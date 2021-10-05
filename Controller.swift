@@ -8,12 +8,11 @@
 import Foundation
 /// Returns a controller object to handle the execution of the amusement park.
 struct Controller {
-    let operationQueue = OperationQueue()
     /// `Reception` object for performing operations in the park.
     var reception = Reception()
     /// Helper function for getting `String` input
     private func getInput(_ string: String = "") -> String {
-        var input: String? = nil
+        var input: String?
         while input == nil {
             print(string)
             input = readLine()
@@ -22,7 +21,7 @@ struct Controller {
     }
     /// Helper function for getting `Int` input
     private func getIntegerInput(_ string: String = "") -> UInt {
-        var input: String? = nil
+        var input: String?
         while input == nil || UInt(input!) == nil {
             print(string)
             input = readLine()
@@ -31,7 +30,7 @@ struct Controller {
     }
     /// Helper function for getting `Float` input
     private func getFloatInput(_ string: String = "") -> Float {
-        var input: String? = nil
+        var input: String?
         while input == nil || Float(input!) == nil {
             print(string)
             input = readLine()
@@ -136,15 +135,14 @@ struct Controller {
         let cost = getFloatInput("Enter cost: ")
         let duration = getTimeInput("Enter duration in HH:MM format: ")
         let timing = getTimingInput("Enter timing details: ")
-        let age = getIntegerInput("Enter minimum age category(1 for children, 18 for adults): ")
+        let age = getIntegerInput("Enter minimum age category(<17 for children, >=18 for adults): ")
         var ageGroup: AgeGroup {
             switch age {
-            case 1:
+            case ...17:
                 return .child
-            case 18:
+            case 18...:
                 return .adult
             default:
-                print("Age other than 1 or 18 entered! Considering as Adult...")
                 return .adult
             }
         }

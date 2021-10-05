@@ -45,7 +45,7 @@ struct Reception {
     
     /// Function that prints the available rides.
     @discardableResult
-    func showAvailableRides() -> Bool{
+    func showAvailableRides() -> Bool {
         print("Available rides: ")
         var availableRidesCount = 0
         for (count, ride) in Reception.rides.enumerated() {
@@ -63,7 +63,7 @@ struct Reception {
     
     /// Function that prints the available rides even if it is currently running.
     @discardableResult
-    func showAvailableRidesForMaintenance() -> Bool{
+    func showAvailableRidesForMaintenance() -> Bool {
         print("Available rides: ")
         var availableRidesCount = 0
         for (count, ride) in Reception.rides.enumerated() {
@@ -81,7 +81,7 @@ struct Reception {
     
     /// Utility function for getting string input
     private func getInput(_ string: String = "") -> String {
-        var input: String? = nil
+        var input: String?
         while input == nil {
             print(string)
             input = readLine()
@@ -91,7 +91,7 @@ struct Reception {
     
     /// Mutating function used to add `User` objects into `users` set.
     mutating func checkIn() {
-        var user: User? = nil
+        var user: User?
         print("Enter user details: ")
         let userName: String
         let userAge: UInt8
@@ -158,11 +158,11 @@ struct Reception {
     
     /// Function which allows users to login
     func userController() {
-        var user: User? = nil
+        var user: User?
         print("Attempting to login...")
         let name = getInput("Enter name: ")
         let mobile = getInput("Enter mobile: ")
-        var tempUser: User? = nil
+        var tempUser: User?
         do {
             /// Creating temporary `User` instance to access in O(1) time
             tempUser = try User(name: name, age: 1, mobile: mobile)
@@ -250,7 +250,7 @@ struct Reception {
     mutating func checkOut() {
         let name = getInput("Enter name: ")
         let mobile = getInput("Enter mobile: ")
-        var tempUser: User? = nil
+        var tempUser: User?
         do {
             tempUser = try User(name: name, age: 1, mobile: mobile)
             if tempUser != nil {

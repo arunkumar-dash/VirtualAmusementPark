@@ -25,7 +25,7 @@ enum Maintenance: CaseIterable {
     case wornOut
 }
 /// Returns a `Ride` object
-class Ride: Hashable, CustomStringConvertible {
+class Ride: CustomStringConvertible {
     let name: String
     let cost: Float
     let duration: Time
@@ -118,6 +118,9 @@ class Ride: Hashable, CustomStringConvertible {
         }
         print("User: \(user.name) onboarded in \(self.name).")
     }
+}
+
+extension Ride: Hashable {
     /// Overloaded `==` operator for two `Ride` objects
     static func == (lhs: Ride, rhs: Ride) -> Bool {
         return lhs.name == rhs.name
