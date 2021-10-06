@@ -91,68 +91,70 @@ struct Reception {
     
     /// Mutating function used to add `User` objects into `users` set.
     mutating func checkIn() {
-        var user: User?
-        print("Enter user details: ")
-        let userName: String
-        let userAge: UInt8
-        var mobile: String
-        userName = getInput("Enter name: ")
-        var tempUserAge = getInput("Enter age: ")
-        while UInt8(tempUserAge) == nil {
-            tempUserAge = getInput("Enter a valid age: ")
-        }
-        userAge = UInt8(tempUserAge)!
-        mobile = getInput("Enter mobile(without spaces): ")
-        /// Error handling mobile number
-        while true {
-            do {
-                user = try User(name: userName, age: userAge, mobile: mobile)
-                users.insert(user!)
-                break
-            } catch User.Error.invalidMobileFormat {
-                mobile = getInput("Enter a 10-digit mobile number: ")
-            } catch {
-                print("User check-in was unsuccessful.")
+        DispatchQueue.global().sync {
+            var user: User?
+            print("Enter user details: ")
+            let userName: String
+            let userAge: UInt8
+            var mobile: String
+            userName = getInput("Enter name: ")
+            var tempUserAge = getInput("Enter age: ")
+            while UInt8(tempUserAge) == nil {
+                tempUserAge = getInput("Enter a valid age: ")
+            }
+            userAge = UInt8(tempUserAge)!
+            mobile = getInput("Enter mobile(without spaces): ")
+            /// Error handling mobile number
+            while true {
+                do {
+                    user = try User(name: userName, age: userAge, mobile: mobile)
+                    if users.contains(user!) {
+                        throw User.Error.userAlreadyExists
+                    }
+                    user!.checkIn()
+                    users.insert(user!)
+                    break
+                } catch User.Error.invalidMobileFormat {
+                    mobile = getInput("Enter a 10-digit mobile number: ")
+                } catch let error {
+                    print("User check-in was unsuccessful.", error)
+                    return
+                }
+            }
+            /// Display available rides
+            guard showAvailableRides() else {
                 return
             }
-        }
-        /// Display available rides
-        guard showAvailableRides() else {
-            return
-        }
-        var flag = true
-        repeat {
-            let rideNumber = getInput("Enter ride number: ")
-            if let index = Int(rideNumber) {
-                if index <= Reception.rides.count && index > 0 {
-                    let currentRide = Reception.rides[index - 1]
-                    if currentRide.isUnderMaintenance() {
-                        print("Ride not available!")
-                    } else if user != nil {
-                        do {
-                            if try user!.add(ride: currentRide) {
-                                print("Ride added successfully!")
+            var flag = true
+            repeat {
+                let rideNumber = getInput("Enter ride number: ")
+                if let index = Int(rideNumber) {
+                    if index <= Reception.rides.count && index > 0 {
+                        let currentRide = Reception.rides[index - 1]
+                        if currentRide.isUnderMaintenance() {
+                            print("Ride not available!")
+                        } else if user != nil {
+                            do {
+                                if try user!.add(ride: currentRide) {
+                                    print("Ride added successfully!")
+                                }
+                            } catch let error {
+                                print(error)
                             }
-                        } catch let error {
-                            print(error)
+                        } else {
+                            print("User doesn't exist!")
                         }
                     } else {
-                        print("User doesn't exist!")
+                        print("Invalid ride number!")
                     }
                 } else {
                     print("Invalid ride number!")
                 }
-            } else {
-                print("Invalid ride number!")
-            }
-            let response = getInput("Do you want to add another ride? ('y'/'n'): ")
-            if response.lowercased() != "y" {
-                flag = false
-            }
-        } while flag
-        if user != nil {
-            user!.checkIn()
-            users.insert(user!)
+                let response = getInput("Do you want to add another ride? ('y'/'n'): ")
+                if response.lowercased() != "y" {
+                    flag = false
+                }
+            } while flag
         }
     }
     
@@ -248,23 +250,25 @@ struct Reception {
     
     /// Function which removes `User` object from `users` and adds to `usersLog`.
     mutating func checkOut() {
-        let name = getInput("Enter name: ")
-        let mobile = getInput("Enter mobile: ")
-        var tempUser: User?
-        do {
-            tempUser = try User(name: name, age: 1, mobile: mobile)
-            if tempUser != nil {
-                if let oldUser = users.remove(tempUser!) {
-                    oldUser.showReceipt()
-                    usersLog.append(oldUser)
+        DispatchQueue.global().sync {
+            let name = getInput("Enter name: ")
+            let mobile = getInput("Enter mobile: ")
+            var tempUser: User?
+            do {
+                tempUser = try User(name: name, age: 1, mobile: mobile)
+                if tempUser != nil {
+                    if let oldUser = users.remove(tempUser!) {
+                        oldUser.showReceipt()
+                        usersLog.append(oldUser)
+                    } else {
+                        print("User doesn't exist!")
+                    }
                 } else {
-                    print("User doesn't exist!")
+                    print("Invalid details!")
                 }
-            } else {
-                print("Invalid details!")
+            } catch let error {
+                print(error)
             }
-        } catch let error {
-            print(error)
         }
     }
     
@@ -286,8 +290,13 @@ struct Reception {
             return
         }
         for user in users {
-            print("Name: \(user.name)\t\tAge: \(user.age)\t\tMobile: \(user.mobile)")
+            print("Name: \(user.name)\t\tAge: \(user.age)\t\tMobile: \(user.mobile)", terminator: " ")
+            if user.currentRide != nil {
+                print("Currently in \(user.currentRide!.name)")
+            }
+            print("")
         }
+        print("Total user checked-in: \(totalUsersCheckedIn())")
     }
     
     /// Prints count of `users`

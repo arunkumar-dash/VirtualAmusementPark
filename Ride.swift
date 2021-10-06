@@ -71,8 +71,8 @@ class Ride: CustomStringConvertible {
     /// Function to start the ride
     func start() throws {
         if currentlyRunning {
-            print("[Ride is currently running!]")
-            print("[Users inside: ]")
+            dump("Ride is currently running!")
+            dump("Users inside: ")
             for user in usersInside {
                 print(user.name, terminator: ", ")
             }
@@ -81,10 +81,10 @@ class Ride: CustomStringConvertible {
         }
         /// Waiting until `usersInside` reach the `minimumCapacity`
         while usersInside.count < minimumCapacity {
-            print("[Waiting for Users...]")
+            dump("Waiting for Users...")
             sleep(10)
         }
-        print("[Ride \(self.name) started...]")
+        dump("Ride \(self.name) started...")
         currentlyRunning = true
         /// Running the ride
         for _ in 1...(duration.hours * 60 + duration.minutes) {
@@ -93,11 +93,11 @@ class Ride: CustomStringConvertible {
             }
             sleep(1)
         }
-        print("[Ride \(self.name) stopped...]")
+        dump("Ride \(self.name) stopped...")
         currentlyRunning = false
         /// Removing `User` instances from the `Ride`
         for user in usersInside {
-            user.visitingRide = nil
+            user.currentRide = nil
         }
         usersInside.removeAll()
     }
@@ -109,14 +109,14 @@ class Ride: CustomStringConvertible {
         if isUnderMaintenance() {
             throw RideError.StartError.rideUnderMaintenance
         }
-        user.visitingRide = self
+        user.currentRide = self
         if usersInside.count == maximumCapacity {
             throw RideError.rideFull
         }
         guard usersInside.insert(user).inserted else {
             throw RideError.userAlreadyInside
         }
-        print("[User: \(user.name) onboarded in \(self.name).]")
+        dump("User: \(user.name) onboarded in \(self.name).")
     }
 }
 

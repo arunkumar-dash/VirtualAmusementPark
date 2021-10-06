@@ -17,6 +17,7 @@ class User {
     /// Enumeration consisting of Errors possible due to user input
     enum Error: Swift.Error {
         case invalidMobileFormat
+        case userAlreadyExists
         enum UserError: Swift.Error {
             case ageGroupUnsatisfied
             case rideAlreadyAdded
@@ -43,7 +44,7 @@ class User {
     /// Helper variable which stores the status of the `User`
     private var isInside: Bool = false
     /// Stores the `Ride` instance which is currently being visited by the `User`
-    var visitingRide: Ride?
+    var currentRide: Ride?
     /// Computed property which returns the total amount spent by the user.
     var totalAmountSpent: Float {
         get {
@@ -135,8 +136,8 @@ class User {
     }
     /// Function to visit a `Ride`
     func visitRide(ride: Ride) throws {
-        if visitingRide != nil {
-            print("[You are currently in \(visitingRide!.name), visit after ride ends!]")
+        if currentRide != nil {
+            dump("You are currently in \(currentRide!.name), visit after ride ends!")
             return
         }
         if rides[ride] == nil {
@@ -151,17 +152,17 @@ class User {
                 /// Marking the ride as visited.
                 rides[ride] = true
             } catch RideError.StartError.rideClosed {
-                print("[Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)]")
+                dump("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
             } catch RideError.StartError.rideUnderMaintenance {
-                print("[Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.maintenanceDetails!)]")
+                dump("Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.maintenanceDetails!)")
             } catch RideError.rideFull {
-                print("[Ride full!]")
+                dump("Ride full!")
             } catch RideError.userAlreadyInside {
-                print("[User already inside!]")
+                dump("User already inside!")
             }
         }
         if canCheckOut() {
-            print("[All rides visited!\nUser \(name) can check out.]")
+            dump("All rides visited!\nUser \(name) can check out.")
         }
     }
 }

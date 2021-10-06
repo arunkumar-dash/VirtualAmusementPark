@@ -102,8 +102,9 @@ struct Controller {
             print("[5] Create refreshment")
             print("[6] Enter as User")
             print("[7] Check time")
-            print("[8] Show checked-out users")
-            print("[9] Quit")
+            print("[8] Show checked-in users")
+            print("[9] Show checked-out users")
+            print("[10] Quit")
             let input = getIntegerInput()
             switch input {
             case 1:
@@ -121,8 +122,10 @@ struct Controller {
             case 7:
                 print("Current time: \(Reception.currentTime.description)")
             case 8:
-                reception.showCheckedOutUsers()
+                reception.showCheckedInUsers()
             case 9:
+                reception.showCheckedOutUsers()
+            case 10:
                 break mainLoop
             default:
                 print("Invalid choice!")
@@ -186,7 +189,7 @@ struct Controller {
                                     maintenanceDuration -= 1
                                 }
                                 Reception.rides[rideNumber - 1].maintenanceDetails = nil
-                                print("[Maintenance work for ride \(currentRide.name) is over!]")
+                                dump("Maintenance work for ride \(currentRide.name) is over!")
                             }
                         } catch {
                             print("Time error")

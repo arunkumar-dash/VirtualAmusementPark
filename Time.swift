@@ -56,7 +56,7 @@ struct Time: Hashable, CustomStringConvertible {
 }
 
 extension Time: Comparable {
-    /// Overloaded `==` operator for two `Time` objects
+    /// Overloaded `==` operator for two `Time` objects as a requirement for `Equatable`
     static func == (lhs: Time, rhs: Time) -> Bool {
         return lhs.hours == rhs.hours && lhs.minutes == rhs.minutes
     }
@@ -66,19 +66,6 @@ extension Time: Comparable {
             return true
         } else if lhs.hours == rhs.hours {
             if lhs.minutes < rhs.minutes {
-                return true
-            }
-            return false
-        } else {
-            return false
-        }
-    }
-    /// Overloaded `>` operator for two `Time` objects
-    static func > (lhs: Time, rhs: Time) -> Bool {
-        if lhs.hours > rhs.hours {
-            return true
-        } else if lhs.hours == rhs.hours {
-            if lhs.minutes > rhs.minutes {
                 return true
             }
             return false
