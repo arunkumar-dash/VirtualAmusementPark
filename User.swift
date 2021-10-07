@@ -66,7 +66,9 @@ class User {
         }
         self.mobile = mobile
     }
-    /// Function which checks-in the user into the park.
+    /// Checks-in the user into the park and returns a Boolean based on `isInside`.
+    ///
+    /// Returns: Boolean value based on `isInside`.
     @discardableResult
     func checkIn() -> Bool {
         if isInside {
@@ -75,7 +77,9 @@ class User {
         isInside = true
         return isInside
     }
-    /// Function which checks-out the user from the park.
+    /// Checks-out the user into the park and returns a Boolean based on `isInside`.
+    ///
+    /// Returns: Boolean value based on `isInside`.
     func checkOut() -> Bool {
         if !isInside {
             return false
@@ -83,7 +87,13 @@ class User {
         isInside = false
         return true
     }
-    /// Function to add a `Ride` object to the collection.
+    /// Adds a `Ride` object to the collection `rides` and returns `true` if success.
+    ///
+    /// Parameter ride: The `Ride` object to add.
+    /// Returns: `true` if `Ride` object is successfully added to the collection `rides`
+    /// Throws:
+    /// - `Error.UserError.ageGroupUnsatisfied` if age group does not satisfy.
+    /// - `Error.UserError.rideAlreadyAdded` if ride already added.
     @discardableResult
     func add(ride: Ride) throws -> Bool {
         if ageGroup == .child && ride.allowedAgeGroup == .adult {
@@ -96,11 +106,13 @@ class User {
             throw Error.UserError.rideAlreadyAdded
         }
     }
-    /// Function to add a `Refreshment` object to the collection.
+    /// Adds a `Refreshment` object to the collection `refreshments`.
     func add(refreshment: Refreshment) {
         refreshments.append(refreshment)
     }
-    /// Boolean function to check if a user can check-out
+    /// Returns a boolean value to check if a user can check-out.
+    ///
+    /// Returns: Boolean value based on the rides visited by the user.
     func canCheckOut() -> Bool {
         for (ride, isVisited) in rides {
             if !isVisited && !ride.isUnderMaintenance() {
@@ -126,7 +138,9 @@ class User {
         print(String(repeating: "-", count: 15))
         print("Total:\t\t\(totalAmountSpent)")
     }
-    /// Returns the value of `isInside`
+    /// Returns the value of `isInside`.
+    ///
+    /// Returns: A `String` value based on `isInside` variable.
     func status() -> String {
         if isInside {
             return "\(name) is inside."
@@ -134,7 +148,12 @@ class User {
             return "\(name) is outside."
         }
     }
-    /// Function to visit a `Ride`
+    /// Marks the `Ride` object passed as a parameter as visited.
+    ///
+    /// Parameter ride: `Ride` object which should be visited.
+    /// Throws:
+    ///  - `RideError.rideNotFound` if ride not found.
+    ///  - `RideError.alreadyVisitedRide` if ride object is already marked visited.
     func visitRide(ride: Ride) throws {
         if currentRide != nil {
             dump("You are currently in \(currentRide!.name), visit after ride ends!")
@@ -148,7 +167,7 @@ class User {
             do {
                 try ride.add(user: self)
                 /// Starts the ride to function
-                try ride.start()
+                ride.start()
                 /// Marking the ride as visited.
                 rides[ride] = true
             } catch RideError.StartError.rideClosed {

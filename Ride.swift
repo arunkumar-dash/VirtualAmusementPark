@@ -41,7 +41,10 @@ class Ride: CustomStringConvertible {
     
     var description: String
     
-    init(name: String, cost: Float, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup, minimumCapacity: UInt, maximumCapacity: UInt) {
+    init(
+        name: String, cost: Float, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup,
+        minimumCapacity: UInt, maximumCapacity: UInt
+    ) {
         self.name = name
         self.cost = cost
         self.duration = duration
@@ -51,7 +54,9 @@ class Ride: CustomStringConvertible {
         self.maximumCapacity = maximumCapacity
         description = "\(name)\t$\(cost)\t\(allowedAgeGroup)"
     }
-    /// Function to check if the ride is under maintenance
+    /// Returns a boolean value based on `maintenanceDetails` property.
+    ///
+    /// Returns: A boolean value based on `maintenanceDetails` property.
     func isUnderMaintenance() -> Bool {
         if maintenanceDetails == nil {
             return false
@@ -59,7 +64,9 @@ class Ride: CustomStringConvertible {
             return true
         }
     }
-    /// Function to check the `timing` with `currentTime`
+    /// Checks `timing` with `currentTime` and returns `true` if `timing` lies after `currentTime`.
+    ///
+    /// Returns: A boolean value based on the `timing`.
     func isOpen() -> Bool {
         let currentTime = Reception.currentTime
         if ((currentTime + duration) <= timing.closingTime) && (currentTime > timing.openingTime) {
@@ -68,8 +75,8 @@ class Ride: CustomStringConvertible {
             return false
         }
     }
-    /// Function to start the ride
-    func start() throws {
+    /// Starts the ride.
+    func start() {
         if currentlyRunning {
             dump("Ride is currently running!")
             dump("Users inside: ")
@@ -101,7 +108,14 @@ class Ride: CustomStringConvertible {
         }
         usersInside.removeAll()
     }
-    /// Function to add `User` object to the ride
+    /// Adds `user` object to the `usersInside` collection.
+    ///
+    /// Parameter user: `User` object which needs to be added.
+    /// Throws:
+    /// - `RideError.StartError.rideClosed` if ride is closed.
+    /// - `RideError.StartError.rideUnderMaintenance` if ride is under maintenance.
+    /// - `RideError.rideFull` if ride is full.
+    /// - `RideError.userAlreadyInside` if user is inside the ride.
     func add(user: User) throws {
         if isOpen() == false {
             throw RideError.StartError.rideClosed

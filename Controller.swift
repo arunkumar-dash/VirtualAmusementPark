@@ -10,7 +10,10 @@ import Foundation
 struct Controller {
     /// `Reception` object for performing operations in the park.
     var reception = Reception()
-    /// Helper function for getting `String` input
+    /// Returns `String` input read from user.
+    ///
+    /// Parameter string: String displayed before reading input.
+    /// Returns: String value read from input.
     private func getInput(_ string: String = "") -> String {
         var input: String?
         while input == nil {
@@ -19,7 +22,10 @@ struct Controller {
         }
         return input!
     }
-    /// Helper function for getting `Int` input
+    /// Returns `UInt` input read from user.
+    ///
+    /// Parameter string: String displayed before reading input.
+    /// Returns: UInt value read from input.
     private func getIntegerInput(_ string: String = "") -> UInt {
         var input: String?
         while input == nil || UInt(input!) == nil {
@@ -28,7 +34,10 @@ struct Controller {
         }
         return UInt(input!)!
     }
-    /// Helper function for getting `Float` input
+    /// Returns `Float` input read from user.
+    ///
+    /// Parameter string: String displayed before reading input.
+    /// Returns: Float value read from input.
     private func getFloatInput(_ string: String = "") -> Float {
         var input: String?
         while input == nil || Float(input!) == nil {
@@ -37,7 +46,10 @@ struct Controller {
         }
         return Float(input!)!
     }
-    /// Helper function for getting `Time` input
+    /// Returns `Time` input read from user.
+    ///
+    /// Parameter string: String displayed before reading input.
+    /// Returns: Time instance read from input.
     private func getTimeInput(_ string: String = "") -> Time {
         while true {
             print(string)
@@ -68,7 +80,10 @@ struct Controller {
             }
         }
     }
-    /// Helper function for getting `Timing` input
+    /// Returns `Timing` input read from user.
+    ///
+    /// Parameter string: String displayed before reading input.
+    /// Returns: Timing instance read from input.
     private func getTimingInput(_ string: String = "") -> Timing {
         while true {
             do {
@@ -83,7 +98,7 @@ struct Controller {
             }
         }
     }
-    /// Function to create timer and directing user towards the operations present.
+    /// Creates a background timer and directs user towards the operations present.
     mutating func start() {
         ///Increments one minute per second in `currentTime`
         DispatchQueue.global().async {
@@ -132,7 +147,7 @@ struct Controller {
             }
         }
     }
-    /// Function to create a `Ride` object and append to `rides` array in `Reception`
+    /// Creates a `Ride` object and appends it to `rides` array in `Reception`
     func createRide() {
         let name = getInput("Enter name: ")
         let cost = getFloatInput("Enter cost: ")
@@ -151,10 +166,15 @@ struct Controller {
         }
         let minCapacity = getIntegerInput("Enter minimum capacity required to start ride: ")
         let maxCapacity = getIntegerInput("Enter maximum capacity: ")
-        Reception.rides.append(Ride(name: name, cost: cost, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minCapacity, maximumCapacity: maxCapacity))
+        Reception.rides.append(
+            Ride(
+                name: name, cost: cost, duration: duration, timing: timing, ageGroup: ageGroup,
+                minimumCapacity: minCapacity, maximumCapacity: maxCapacity
+            )
+        )
         print("Ride \(name) created!")
     }
-    /// Function to add maintenance for a specific `Ride` object
+    /// Adds maintenance details for a specific `Ride` object
     func addMaintenance() {
         guard reception.showAvailableRidesForMaintenance() else {
             return
@@ -202,7 +222,7 @@ struct Controller {
             print("Invalid ride number!")
         }
     }
-    /// Function to create a `Refreshment` object and append to `refreshments` array
+    /// Creates a `Refreshment` object and appends to `refreshments` array
     func createRefreshment() {
         print("Enter refreshment details: ")
         let name = getInput("Enter name: ")

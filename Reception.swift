@@ -43,7 +43,9 @@ struct Reception {
     /// A static array consisting of refreshments in the park.
     static var refreshments: Array<Refreshment> = []
     
-    /// Function that prints the available rides.
+    /// Prints the available rides and returns false if no rides available, else true.
+    ///
+    /// Returns: Boolean value based on the available rides count.
     @discardableResult
     func showAvailableRides() -> Bool {
         print("Available rides: ")
@@ -61,7 +63,9 @@ struct Reception {
         return true
     }
     
-    /// Function that prints the available rides even if it is currently running.
+    /// Prints the available rides even if it is currently running and returns false if no rides available, else true.
+    ///
+    /// Returns: Boolean value based on the available rides count.
     @discardableResult
     func showAvailableRidesForMaintenance() -> Bool {
         print("Available rides: ")
@@ -79,7 +83,10 @@ struct Reception {
         return true
     }
     
-    /// Utility function for getting string input
+    /// Returns the input as a String obtained from user.
+    ///
+    /// Parameter string: String displayed before reading input.
+    /// Returns: String value read from input.
     private func getInput(_ string: String = "") -> String {
         var input: String?
         while input == nil {
@@ -89,7 +96,7 @@ struct Reception {
         return input!
     }
     
-    /// Mutating function used to add `User` objects into `users` set.
+    /// Adds `User` objects into `users` set.
     mutating func checkIn() {
         DispatchQueue.global().sync {
             var user: User?
@@ -158,7 +165,7 @@ struct Reception {
         }
     }
     
-    /// Function which allows users to login
+    /// Allows users to login
     func userController() {
         var user: User?
         print("Attempting to login...")
@@ -248,7 +255,7 @@ struct Reception {
         }
     }
     
-    /// Function which removes `User` object from `users` and adds to `usersLog`.
+    /// Removes `User` object from `users` and adds to `usersLog`.
     mutating func checkOut() {
         DispatchQueue.global().sync {
             let name = getInput("Enter name: ")
@@ -299,7 +306,9 @@ struct Reception {
         print("Total user checked-in: \(totalUsersCheckedIn())")
     }
     
-    /// Prints count of `users`
+    /// Returns count of `users`
+    ///
+    /// Returns: Count of `users`
     func totalUsersCheckedIn() -> Int {
         return users.count
     }
