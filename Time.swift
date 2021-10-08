@@ -8,8 +8,7 @@
 import Foundation
 
 /// Overloaded `-=` operator for `Time` and `Int`
-infix operator -=
-func -= (lhs: inout Time, rhs: Int) {
+func -=(lhs: inout Time, rhs: Int) {
     let totalMinutes = Int(lhs.minutes) + Int(lhs.hours) * 60 - rhs
     lhs.hours = UInt8((totalMinutes / 60) % 24)
     lhs.minutes = UInt8(totalMinutes % 60)
@@ -51,7 +50,7 @@ struct Time: Hashable, CustomStringConvertible {
         add(hours: extraHours)
     }
     /// Overloaded `+` operator for two `Time` objects
-    static func + (lhs: Time, rhs: Time) -> Time {
+    static func +(lhs: Time, rhs: Time) -> Time {
         var finalTime = lhs
         finalTime.add(hours: rhs.hours)
         finalTime.add(minutes: rhs.minutes)
@@ -61,11 +60,11 @@ struct Time: Hashable, CustomStringConvertible {
 
 extension Time: Comparable {
     /// Overloaded `==` operator for two `Time` objects as a requirement for `Equatable`
-    static func == (lhs: Time, rhs: Time) -> Bool {
+    static func ==(lhs: Time, rhs: Time) -> Bool {
         return lhs.hours == rhs.hours && lhs.minutes == rhs.minutes
     }
     /// Overloaded `<` operator for two `Time` objects
-    static func < (lhs: Time, rhs: Time) -> Bool {
+    static func <(lhs: Time, rhs: Time) -> Bool {
         if lhs.hours < rhs.hours {
             return true
         } else if lhs.hours == rhs.hours {

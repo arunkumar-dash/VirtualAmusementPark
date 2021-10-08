@@ -64,7 +64,7 @@ struct Controller {
                     continue
                 }
                 let splitInput = input!.split(separator: ":")
-                guard splitInput.count == 2 && UInt8(splitInput[0]) != nil && UInt8(splitInput[0]) != nil else {
+                guard splitInput.count == 2 && UInt8(splitInput[0]) != nil && UInt8(splitInput[1]) != nil else {
                     print("Invalid input!")
                     continue
                 }

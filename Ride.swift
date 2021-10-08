@@ -136,7 +136,7 @@ class Ride: CustomStringConvertible {
 
 extension Ride: Hashable {
     /// Overloaded `==` operator for two `Ride` objects
-    static func == (lhs: Ride, rhs: Ride) -> Bool {
+    static func ==(lhs: Ride, rhs: Ride) -> Bool {
         return lhs.name == rhs.name
     }
     /// Hash function involving only `name`

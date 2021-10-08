@@ -188,7 +188,7 @@ class User {
 
 extension User: Equatable {
     /// Overloaded `==` operator for two `User` objects
-    static func == (lhs: User, rhs: User) -> Bool {
+    static func ==(lhs: User, rhs: User) -> Bool {
         return lhs.name == rhs.name && lhs.mobile == rhs.mobile
     }
 }
