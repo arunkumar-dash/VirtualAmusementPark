@@ -54,6 +54,9 @@ class User {
                     sum += ride.cost
                 }
             }
+            for refreshment in refreshments {
+                sum += refreshment.cost
+            }
             return sum
         }
     }
@@ -181,7 +184,7 @@ class User {
             }
         }
         if canCheckOut() {
-            dump("All rides visited!\nUser \(name) can check out.")
+            dump("All rides visited! User \(name) can check out.")
         }
     }
 }

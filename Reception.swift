@@ -166,7 +166,7 @@ struct Reception {
     }
     
     /// Allows users to login
-    func userController() {
+    mutating func userController() {
         var user: User?
         print("Attempting to login...")
         let name = getInput("Enter name: ")
@@ -207,8 +207,16 @@ struct Reception {
             }
             switch UInt8(input)! {
             case 1:
+                var ridesCount = 0
                 for ride in user!.rides {
-                    print(ride.key.description)
+                    if ride.value == false {
+                        ridesCount += 1
+                        print(ride.key.description)
+                    }
+                }
+                if ridesCount == 0 {
+                    print("All rides visited!")
+                    break
                 }
                 let rideName = getInput("Enter ride name: ")
                 var isValid = true
@@ -231,7 +239,7 @@ struct Reception {
             case 2:
                 if Reception.refreshments.isEmpty {
                     print("No refreshments available!")
-                    break userLoop
+                    break
                 }
                 for (idx, refreshment) in Reception.refreshments.enumerated() {
                     print("[\(idx + 1)]\t\t\(refreshment.name)")
@@ -247,6 +255,11 @@ struct Reception {
                     print("Checked out already!")
                     break userLoop
                 }
+                users.remove(user!)
+                usersLog.append(user!)
+                print("Check-out success!")
+                user!.showReceipt()
+                break userLoop
             case 4:
                 break userLoop
             default:
