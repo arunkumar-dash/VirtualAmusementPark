@@ -7,153 +7,153 @@
 
 import Foundation
 /// Returns a controller object to handle the execution of the amusement park.
-struct Controller {
+class Controller {
     /// `Reception` object for performing operations in the park.
-    var reception = Reception()
-    /// Returns `String` input read from user.
-    ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: String value read from input.
-    private func getInput(_ string: String = "") -> String {
-        var input: String?
-        while input == nil {
-            print(string)
-            input = readLine()
+    private var reception = Reception()
+    private var user: User?
+    
+    func start() {
+        reception.startTimer()
+        let mainLogin = Login(windowName: "Main Window")
+        mainLogin.addCommand(name: "Admin Login", adminLogin)
+        mainLogin.addCommand(name: "User Login", userLogin)
+        do {
+            try mainLogin.createWindow()
+        } catch let error {
+            print("Error initiating window:",error)
+            return
         }
-        return input!
     }
-    /// Returns `UInt` input read from user.
-    ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: UInt value read from input.
-    private func getIntegerInput(_ string: String = "") -> UInt {
-        var input: String?
-        while input == nil || UInt(input!) == nil {
-            print(string)
-            input = readLine()
+    
+    func adminLogin() {
+        let adminLogin = Login(windowName: "Admin Login Window")
+        adminLogin.addCommand(name: "Create ride", createRide)
+        adminLogin.addCommand(name: "Create refreshment", createRefreshment)
+        adminLogin.addCommand(name: "Add maintenance details", addMaintenance)
+        adminLogin.addCommand(name: "Check time", printCurrentTime)
+        adminLogin.addCommand(name: "Show checked-in users", showCheckedInUsers)
+        adminLogin.addCommand(name: "Show checked-out users", showCheckedOutUsers)
+        do {
+            try adminLogin.createWindow()
+        } catch let error {
+            print("Error initiating window:",error)
+            return
         }
-        return UInt(input!)!
     }
-    /// Returns `Float` input read from user.
-    ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: Float value read from input.
-    private func getFloatInput(_ string: String = "") -> Float {
-        var input: String?
-        while input == nil || Float(input!) == nil {
-            print(string)
-            input = readLine()
+    
+    /// Allows users to login
+    func userLogin() {
+        user = userAuth()
+        if user != nil {
+            print("Login success!")
+        } else {
+            print("Login failed!")
+            return
         }
-        return Float(input!)!
+        
+        /// Access options for user
+        let userLogin = Login(windowName: "User Login Window")
+        userLogin.addCommand(name: "Visit Ride", visitRide)
+        userLogin.addCommand(name: "Buy refreshments", buyRefreshments)
+        userLogin.addCommand(name: "Check-out", checkOut)
+        do {
+            try userLogin.createWindow()
+        } catch let error {
+            print("Error initiating window:", error)
+            return
+        }
     }
-    /// Returns `Time` input read from user.
-    ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: Time instance read from input.
-    private func getTimeInput(_ string: String = "") -> Time {
-        while true {
-            print(string)
-            let input = readLine()
-            do {
-                guard input != nil else {
-                    print("Invalid input!")
-                    continue
+    
+    private func checkOut() {
+        if user!.checkOut() == false {
+            print("Checked out already!")
+            return
+        }
+        reception.users.remove(user!)
+        reception.usersLog.append(user!)
+        print("Check-out success!")
+        user!.showReceipt()
+    }
+    
+    private func visitRide() {
+        var ridesCount = 0
+        for ride in user!.rides {
+            if ride.value == false {
+                ridesCount += 1
+                print(ride.key.description)
+            }
+        }
+        if ridesCount == 0 {
+            print("All rides visited!")
+            return
+        }
+        let rideName = InputHandler.getInput("Enter ride name: ")
+        var isValid = true
+        for ride in user!.rides {
+            if ride.key.name == rideName {
+                DispatchQueue.global().async {
+                    do {
+                        try self.user!.visitRide(ride: ride.key)
+                    } catch let error {
+                        print(error)
+                    }
                 }
-                guard input!.contains(":") else {
-                    print("Invalid input!")
-                    continue
+                isValid = false
+                return
+            }
+        }
+        if isValid {
+            print("Ride not available!")
+        }
+    }
+    
+    private func buyRefreshments() {
+        if Reception.refreshments.isEmpty {
+            print("No refreshments available!")
+            return
+        }
+        for (idx, refreshment) in Reception.refreshments.enumerated() {
+            print("[\(idx + 1)]\t\t\(refreshment.name)")
+        }
+        let idx = InputHandler.getInput("Enter refreshment number: ")
+        if Int(idx) != nil && Int(idx)! <= Reception.refreshments.count && Int(idx)! > 0{
+            user!.refreshments.append(Reception.refreshments[Int(idx)! - 1])
+        }  else {
+            print("Invalid choice!")
+        }
+    }
+    
+    private func userAuth() -> User? {
+        print("Attempting to login...")
+        let name = InputHandler.getInput("Enter name: ")
+        let mobile = InputHandler.getInput("Enter mobile: ")
+        var tempUser: User?
+        do {
+            /// Creating temporary `User` instance to access in O(1) time
+            tempUser = try User(name: name, age: 1, mobile: mobile)
+            if tempUser != nil {
+                if let idx = reception.users.firstIndex(of: tempUser!) {
+                    return reception.users[idx]
+                } else {
+                    print("Cannot find user. Check-In instead!")
+                    return reception.checkIn()
                 }
-                let splitInput = input!.split(separator: ":")
-                guard splitInput.count == 2 && UInt8(splitInput[0]) != nil && UInt8(splitInput[1]) != nil else {
-                    print("Invalid input!")
-                    continue
-                }
-                let hours = UInt8(splitInput[0])!
-                let minutes = UInt8(splitInput[1])!
-                return try Time(hours: hours, minutes: minutes)
-            } catch Time.Error.invalidHour {
-                print("Invalid hour entered!")
-            } catch Time.Error.invalidMinute {
-                print("Invalid minute entered!")
-            } catch {
-                print("Unexpected input entered!")
+            } else {
+                print("Inputs invalid!")
+                return nil
             }
+        } catch let error {
+            print(error)
+            return nil
         }
     }
-    /// Returns `Timing` input read from user.
-    ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: Timing instance read from input.
-    private func getTimingInput(_ string: String = "") -> Timing {
-        while true {
-            do {
-                print(string)
-                let openingTime = getTimeInput("Enter opening time in HH:MM format: ")
-                let closingTime = getTimeInput("Enter closing time in HH:MM format: ")
-                return try Timing(opening: openingTime, closing: closingTime)
-            } catch Timing.Error.invalidTiming {
-                print("Invalid timing!")
-            } catch {
-                print("Unexpected error occured!")
-            }
-        }
-    }
-    /// Creates a background timer and directs user towards the operations present.
-    mutating func start() {
-        ///Increments one minute per second in `currentTime`
-        DispatchQueue.global().async {
-            while true {
-                sleep(1)
-                Reception.currentTime.add(minutes: 1)
-            }
-        }
-        mainLoop:
-        while true {
-            print("----- Main Window -----")
-            print("[1] Create ride")
-            print("[2] Check-in")
-            print("[3] Check-out")
-            print("[4] Add maintenance details")
-            print("[5] Create refreshment")
-            print("[6] Enter as User")
-            print("[7] Check time")
-            print("[8] Show checked-in users")
-            print("[9] Show checked-out users")
-            print("[10] Quit")
-            let input = getIntegerInput()
-            switch input {
-            case 1:
-                createRide()
-            case 2:
-                reception.checkIn()
-            case 3:
-                reception.checkOut()
-            case 4:
-                addMaintenance()
-            case 5:
-                createRefreshment()
-            case 6:
-                reception.userController()
-            case 7:
-                print("Current time: \(Reception.currentTime.description)")
-            case 8:
-                reception.showCheckedInUsers()
-            case 9:
-                reception.showCheckedOutUsers()
-            case 10:
-                break mainLoop
-            default:
-                print("Invalid choice!")
-            }
-        }
-    }
+    
     /// Creates a `Ride` object and appends it to `rides` array in `Reception`
     func createRide() {
-        let name = getInput("Enter name: ")
-        let cost = getFloatInput("Enter cost: ")
-        let duration = getTimeInput("Enter duration in HH:MM format: ")
-        let timing = getTimingInput("Enter timing details: ")
-        let age = getIntegerInput("Enter minimum age category(<17 for children, >=18 for adults): ")
+        let name = InputHandler.getInput("Enter ride name: ")
+        let duration = InputHandler.getTimeInput("Enter ride duration in HH:MM format: ")
+        let timing = InputHandler.getTimingInput("Enter ride timing details: ")
+        let age = InputHandler.getIntegerInput("Enter minimum age category(<17 for children, >=18 for adults): ")
         var ageGroup: AgeGroup {
             switch age {
             case ...17:
@@ -164,13 +164,10 @@ struct Controller {
                 return .adult
             }
         }
-        let minCapacity = getIntegerInput("Enter minimum capacity required to start ride: ")
-        let maxCapacity = getIntegerInput("Enter maximum capacity: ")
+        let minCapacity = InputHandler.getIntegerInput("Enter minimum capacity required to start ride: ")
+        let maxCapacity = InputHandler.getIntegerInput("Enter maximum capacity: ")
         Reception.rides.append(
-            Ride(
-                name: name, cost: cost, duration: duration, timing: timing, ageGroup: ageGroup,
-                minimumCapacity: minCapacity, maximumCapacity: maxCapacity
-            )
+            RideSelector.getRideBasedOnType(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minCapacity, maximumCapacity: maxCapacity)
         )
         print("Ride \(name) created!")
     }
@@ -179,7 +176,7 @@ struct Controller {
         guard reception.showAvailableRidesForMaintenance() else {
             return
         }
-        let rideNumber = Int(getIntegerInput("Enter ride number: "))
+        let rideNumber = Int(InputHandler.getIntegerInput("Enter ride number: "))
         if rideNumber <= Reception.rides.count && rideNumber > 0 {
             let currentRide = Reception.rides[rideNumber - 1]
             /// Checks if the ride is currently under maintenance
@@ -190,19 +187,19 @@ struct Controller {
                 for (index, maintenanceType) in Maintenance.allCases.enumerated() {
                     print("[\(index + 1)]\t\t\(maintenanceType)")
                 }
-                let maintenanceIdx = getIntegerInput()
+                let maintenanceIdx = InputHandler.getIntegerInput()
                 guard maintenanceIdx > 0 && maintenanceIdx <= Maintenance.allCases.count else {
                     print("Invalid number!")
                     return
                 }
                 for (index, maintenanceType) in Maintenance.allCases.enumerated() {
                     if index + 1 == maintenanceIdx {
-                        var maintenanceDuration = getTimeInput("Enter maintenance duration: ")
+                        var maintenanceDuration = InputHandler.getTimeInput("Enter maintenance duration: ")
                         print("Ride \(currentRide.name) is under maintenance for \(maintenanceDuration.hours) hours and \(maintenanceDuration.minutes) minutes due to \(maintenanceType)!")
                         Reception.rides[rideNumber - 1].maintenanceDetails = maintenanceType
                         do {
                             let defaultTime = try Time(hours: 0, minutes: 0)
-                            ///Maintenance work goes in background
+                            /// Maintenance work goes in background
                             DispatchQueue(label: "Maintenance").async {
                                 while maintenanceDuration > defaultTime {
                                     sleep(1)
@@ -225,8 +222,20 @@ struct Controller {
     /// Creates a `Refreshment` object and appends to `refreshments` array
     func createRefreshment() {
         print("Enter refreshment details: ")
-        let name = getInput("Enter name: ")
-        let cost = getFloatInput("Enter cost: ")
+        let name = InputHandler.getInput("Enter name: ")
+        let cost = InputHandler.getFloatInput("Enter cost: ")
         Reception.refreshments.append(Refreshment(name: name, cost: cost))
+    }
+    
+    func showCheckedInUsers() {
+        reception.showCheckedInUsers()
+    }
+    
+    func showCheckedOutUsers() {
+        reception.showCheckedOutUsers()
+    }
+    
+    func printCurrentTime() {
+        print("Current time: \(Reception.currentTime.description)")
     }
 }

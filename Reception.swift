@@ -10,9 +10,9 @@ import Foundation
 /// Contains instances of users entered into the park through this reception.
 struct Reception {
     /// A set consisting of `User` instances.
-    private var users: Set<User> = []
+    var users: Set<User> = []
     /// An array consisting of `User`s checked-out.
-    private var usersLog: Array<User> = []
+    var usersLog: Array<User> = []
     /// A static array consisting of rides in the park.
     static var rides: Array<Ride> = []
     /// Static variable which stores the time since start of execution.
@@ -42,6 +42,16 @@ struct Reception {
     static private var currentMinute: UInt8 = 0
     /// A static array consisting of refreshments in the park.
     static var refreshments: Array<Refreshment> = []
+    /// Starts the currentTime to run asynchronously.
+    func startTimer() {
+        ///Increments one minute per second in `currentTime`
+        DispatchQueue.global().async {
+            while true {
+                sleep(1)
+                Reception.currentTime.add(minutes: 1)
+            }
+        }
+    }
     
     /// Prints the available rides and returns false if no rides available, else true.
     ///
@@ -83,34 +93,18 @@ struct Reception {
         return true
     }
     
-    /// Returns the input as a String obtained from user.
-    ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: String value read from input.
-    private func getInput(_ string: String = "") -> String {
-        var input: String?
-        while input == nil {
-            print(string)
-            input = readLine()
-        }
-        return input!
-    }
-    
     /// Adds `User` objects into `users` set.
-    mutating func checkIn() {
-        DispatchQueue.global().sync {
-            var user: User?
+    @discardableResult
+    mutating func checkIn() -> User?{
+        var user: User?
+        return DispatchQueue.global().sync {
             print("Enter user details: ")
             let userName: String
             let userAge: UInt8
             var mobile: String
-            userName = getInput("Enter name: ")
-            var tempUserAge = getInput("Enter age: ")
-            while UInt8(tempUserAge) == nil {
-                tempUserAge = getInput("Enter a valid age: ")
-            }
-            userAge = UInt8(tempUserAge)!
-            mobile = getInput("Enter mobile(without spaces): ")
+            userName = InputHandler.getInput("Enter name: ")
+            userAge = UInt8(InputHandler.getIntegerInput("Enter age: "))
+            mobile = InputHandler.getInput("Enter mobile(without spaces): ")
             /// Error handling mobile number
             while true {
                 do {
@@ -122,157 +116,51 @@ struct Reception {
                     users.insert(user!)
                     break
                 } catch User.Error.invalidMobileFormat {
-                    mobile = getInput("Enter a 10-digit mobile number: ")
+                    mobile = InputHandler.getInput("Enter a 10-digit mobile number: ")
                 } catch let error {
                     print("User check-in was unsuccessful.", error)
-                    return
+                    return nil
                 }
             }
             /// Display available rides
             guard showAvailableRides() else {
-                return
+                return user
             }
             var flag = true
             repeat {
-                let rideNumber = getInput("Enter ride number: ")
-                if let index = Int(rideNumber) {
-                    if index <= Reception.rides.count && index > 0 {
-                        let currentRide = Reception.rides[index - 1]
-                        if currentRide.isUnderMaintenance() {
-                            print("Ride not available!")
-                        } else if user != nil {
-                            do {
-                                if try user!.add(ride: currentRide) {
-                                    print("Ride added successfully!")
-                                }
-                            } catch let error {
-                                print(error)
+                let index = InputHandler.getIntegerInput("Enter ride number: ")
+                if index <= Reception.rides.count && index > 0 {
+                    let currentRide = Reception.rides[Int(index) - 1]
+                    if currentRide.isUnderMaintenance() {
+                        print("Ride not available!")
+                    } else if user != nil {
+                        do {
+                            if try user!.add(ride: currentRide) {
+                                print("Ride added successfully!")
                             }
-                        } else {
-                            print("User doesn't exist!")
+                        } catch let error {
+                            print(error)
                         }
                     } else {
-                        print("Invalid ride number!")
+                        print("User doesn't exist!")
                     }
                 } else {
                     print("Invalid ride number!")
                 }
-                let response = getInput("Do you want to add another ride? ('y'/'n'): ")
+                let response = InputHandler.getInput("Do you want to add another ride? ('y'/'n'): ")
                 if response.lowercased() != "y" {
                     flag = false
                 }
             } while flag
-        }
-    }
-    
-    /// Allows users to login
-    mutating func userController() {
-        var user: User?
-        print("Attempting to login...")
-        let name = getInput("Enter name: ")
-        let mobile = getInput("Enter mobile: ")
-        var tempUser: User?
-        do {
-            /// Creating temporary `User` instance to access in O(1) time
-            tempUser = try User(name: name, age: 1, mobile: mobile)
-            if tempUser != nil {
-                if let idx = users.firstIndex(of: tempUser!) {
-                    user = users[idx]
-                } else {
-                    print("Cannot find user")
-                    return
-                }
-            } else {
-                print("Login attempt failed!")
-                return
-            }
-        } catch let error {
-            print("Login failed!")
-            print(error)
-            return
-        }
-        print("Login success!")
-        /// Access options for user
-    userLoop:
-        while true {
-            print("----- User Window -----")
-            print("[1] Visit ride")
-            print("[2] Buy refreshments")
-            print("[3] Check-out")
-            print("[4] Exit but don't check out")
-            let input = getInput()
-            if UInt8(input) == nil {
-                print("Invalid input!")
-                continue userLoop
-            }
-            switch UInt8(input)! {
-            case 1:
-                var ridesCount = 0
-                for ride in user!.rides {
-                    if ride.value == false {
-                        ridesCount += 1
-                        print(ride.key.description)
-                    }
-                }
-                if ridesCount == 0 {
-                    print("All rides visited!")
-                    break
-                }
-                let rideName = getInput("Enter ride name: ")
-                var isValid = true
-                for ride in user!.rides {
-                    if ride.key.name == rideName {
-                        DispatchQueue.global().async {
-                            do {
-                                try user!.visitRide(ride: ride.key)
-                            } catch let error {
-                                print(error)
-                            }
-                        }
-                        isValid = false
-                        break userLoop
-                    }
-                }
-                if isValid {
-                    print("Ride not available!")
-                }
-            case 2:
-                if Reception.refreshments.isEmpty {
-                    print("No refreshments available!")
-                    break
-                }
-                for (idx, refreshment) in Reception.refreshments.enumerated() {
-                    print("[\(idx + 1)]\t\t\(refreshment.name)")
-                }
-                let idx = getInput("Enter refreshment number: ")
-                if Int(idx) != nil && Int(idx)! <= Reception.refreshments.count && Int(idx)! > 0{
-                    user!.refreshments.append(Reception.refreshments[Int(idx)! - 1])
-                }  else {
-                    print("Invalid choice!")
-                }
-            case 3:
-                if user!.checkOut() == false {
-                    print("Checked out already!")
-                    break userLoop
-                }
-                users.remove(user!)
-                usersLog.append(user!)
-                print("Check-out success!")
-                user!.showReceipt()
-                break userLoop
-            case 4:
-                break userLoop
-            default:
-                print("Invalid selection!")
-            }
+            return user
         }
     }
     
     /// Removes `User` object from `users` and adds to `usersLog`.
     mutating func checkOut() {
         DispatchQueue.global().sync {
-            let name = getInput("Enter name: ")
-            let mobile = getInput("Enter mobile: ")
+            let name = InputHandler.getInput("Enter name: ")
+            let mobile = InputHandler.getInput("Enter mobile: ")
             var tempUser: User?
             do {
                 tempUser = try User(name: name, age: 1, mobile: mobile)

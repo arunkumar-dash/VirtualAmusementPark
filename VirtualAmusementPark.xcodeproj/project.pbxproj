@@ -15,6 +15,10 @@
 		1DA0F55E270496D400AE3A3E /* Refreshment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F55D270496D400AE3A3E /* Refreshment.swift */; };
 		1DA0F560270562E400AE3A3E /* Ride.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F55F270562E400AE3A3E /* Ride.swift */; };
 		1DA0F5622706A31400AE3A3E /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F5612706A31400AE3A3E /* Controller.swift */; };
+		1DA0F56F2715882E00AE3A3E /* InputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F56E2715882E00AE3A3E /* InputHandler.swift */; };
+		1DA0F57127168A0700AE3A3E /* RideSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F57027168A0700AE3A3E /* RideSelector.swift */; };
+		1DA0F573271924A800AE3A3E /* Login.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F572271924A800AE3A3E /* Login.swift */; };
+		1DA0F575271924D400AE3A3E /* Printer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA0F574271924D400AE3A3E /* Printer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,6 +44,10 @@
 		1DA0F55F270562E400AE3A3E /* Ride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ride.swift; sourceTree = "<group>"; };
 		1DA0F5612706A31400AE3A3E /* Controller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
 		1DA0F567270C87A300AE3A3E /* VirtualAmusementParkTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VirtualAmusementParkTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DA0F56E2715882E00AE3A3E /* InputHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputHandler.swift; sourceTree = "<group>"; };
+		1DA0F57027168A0700AE3A3E /* RideSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RideSelector.swift; sourceTree = "<group>"; };
+		1DA0F572271924A800AE3A3E /* Login.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Login.swift; sourceTree = "<group>"; };
+		1DA0F574271924D400AE3A3E /* Printer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Printer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,7 +76,11 @@
 				1DA0F55D270496D400AE3A3E /* Refreshment.swift */,
 				1DA0F55B2704922400AE3A3E /* Timing.swift */,
 				1DA0F55927048BDA00AE3A3E /* Time.swift */,
+				1DA0F572271924A800AE3A3E /* Login.swift */,
+				1DA0F56E2715882E00AE3A3E /* InputHandler.swift */,
+				1DA0F574271924D400AE3A3E /* Printer.swift */,
 				1DA0F55727048BC000AE3A3E /* User.swift */,
+				1DA0F57027168A0700AE3A3E /* RideSelector.swift */,
 				1DA0F55527048A2900AE3A3E /* Reception.swift */,
 				1DA0F54D2703290800AE3A3E /* VirtualAmusementPark */,
 				1DA0F54C2703290800AE3A3E /* Products */,
@@ -181,13 +193,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1DA0F575271924D400AE3A3E /* Printer.swift in Sources */,
+				1DA0F57127168A0700AE3A3E /* RideSelector.swift in Sources */,
 				1DA0F55A27048BDA00AE3A3E /* Time.swift in Sources */,
+				1DA0F56F2715882E00AE3A3E /* InputHandler.swift in Sources */,
 				1DA0F55E270496D400AE3A3E /* Refreshment.swift in Sources */,
 				1DA0F55C2704922400AE3A3E /* Timing.swift in Sources */,
 				1DA0F54F2703290800AE3A3E /* main.swift in Sources */,
 				1DA0F55627048A2900AE3A3E /* Reception.swift in Sources */,
 				1DA0F55827048BC000AE3A3E /* User.swift in Sources */,
 				1DA0F560270562E400AE3A3E /* Ride.swift in Sources */,
+				1DA0F573271924A800AE3A3E /* Login.swift in Sources */,
 				1DA0F5622706A31400AE3A3E /* Controller.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

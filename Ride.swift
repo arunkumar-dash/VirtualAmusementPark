@@ -20,7 +20,7 @@ enum RideError: Error {
 }
 /// Maintenance types as Enumeration
 enum Maintenance: CaseIterable {
-    case watersShortage
+    case waterShortage
     case powerOutage
     case wornOut
 }
@@ -142,5 +142,33 @@ extension Ride: Hashable {
     /// Hash function involving only `name`
     func hash(into hasher: inout Hasher) {
         hasher.combine(self.name)
+    }
+}
+
+class WaterRide: Ride {
+    init(
+        name: String, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup,
+        minimumCapacity: UInt, maximumCapacity: UInt
+    ) {
+        super.init(name: name, cost: 25, duration: duration, timing: timing, ageGroup: allowedAgeGroup, minimumCapacity: minimumCapacity, maximumCapacity: maximumCapacity)
+    }
+    /// Starts the `WaterRide`.
+    override func start() {
+        dump("Starting water ride...")
+        super.start()
+    }
+}
+
+class DryRide: Ride {
+    init(
+        name: String, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup,
+        minimumCapacity: UInt, maximumCapacity: UInt
+    ) {
+        super.init(name: name, cost: 20, duration: duration, timing: timing, ageGroup: allowedAgeGroup, minimumCapacity: minimumCapacity, maximumCapacity: maximumCapacity)
+    }
+    /// Starts the `DryRide`.
+    override func start() {
+        dump("Starting dry ride...")
+        super.start()
     }
 }
