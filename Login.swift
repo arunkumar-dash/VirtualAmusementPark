@@ -28,7 +28,7 @@ class Login {
             case 1...commands.count:
                 commands[input - 1].1()
             default:
-                print("Invalid input!")
+                Printer.printError("Invalid input")
             }
         }
     }

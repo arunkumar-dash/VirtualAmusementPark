@@ -176,7 +176,7 @@ class User {
             } catch RideError.StartError.rideClosed {
                 dump("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
             } catch RideError.StartError.rideUnderMaintenance {
-                dump("Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.maintenanceDetails!)")
+                dump("Cannot visit ride! Ride is under maintenance.\nMaintenance details: \(ride.getMaintenanceDetails()!)")
             } catch RideError.rideFull {
                 dump("Ride full!")
             } catch RideError.userAlreadyInside {

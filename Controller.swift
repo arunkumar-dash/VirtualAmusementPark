@@ -8,24 +8,107 @@
 import Foundation
 /// Returns a controller object to handle the execution of the amusement park.
 class Controller {
+    /// A set consisting of `User` instances.
+    static var users: Set<User> = []
+    /// An array consisting of `User`s checked-out.
+    static var usersLog: Array<User> = []
+    /// A static array consisting of rides in the park.
+    static var rides: Array<Ride> = []
+    /// Static variable which stores the time since start of execution.
+    private static var currentTime: Time {
+        get {
+            do {
+                return try Time(hours: currentHour, minutes: currentMinute)
+            } catch {
+                fatalError()
+            }
+        }
+        set {
+            currentHour = newValue.hours
+            currentMinute = newValue.minutes
+            if currentMinute >= 60 {
+                currentHour += 1
+                currentMinute %= 60
+            }
+            if currentHour >= 24 {
+                currentHour %= 24
+            }
+        }
+    }
+    /// Static variable which utility for `currentTime`.
+    private static var currentHour: UInt8 = 0
+    /// Static variable which utility for `currentTime`.
+    private static var currentMinute: UInt8 = 0
+    /// A static array consisting of refreshments in the park.
+    private static var refreshments: Array<Refreshment> = []
+    /// Starts the currentTime to run asynchronously.
+    private func startTimer() {
+        ///Increments one minute per second in `currentTime`
+        DispatchQueue.global().async {
+            while true {
+                sleep(1)
+                Controller.currentTime.add(minutes: 1)
+            }
+        }
+    }
+    
+    /// Prints the available rides and returns false if no rides available, else true.
+    ///
+    /// Returns: Boolean value based on the available rides count.
+    @discardableResult
+    static func showAvailableRides() -> Bool {
+        print("Available rides: ")
+        var availableRidesCount = 0
+        for (count, ride) in Controller.rides.enumerated() {
+            if ride.isUnderMaintenance() == false && ride.currentlyRunning == false {
+                print("[\(count + 1)]\t\(ride.description)")
+                availableRidesCount += 1
+            }
+        }
+        guard availableRidesCount > 0 else {
+            Printer.printError("No rides available")
+            return false
+        }
+        return true
+    }
+    
+    /// Prints the available rides even if it is currently running and returns false if no rides available, else true.
+    ///
+    /// Returns: Boolean value based on the available rides count.
+    @discardableResult
+    private static func showAvailableRidesForMaintenance() -> Bool {
+        print("Available rides: ")
+        var availableRidesCount = 0
+        for (count, ride) in Controller.rides.enumerated() {
+            if ride.isUnderMaintenance() == false {
+                print("[\(count + 1)]\t\(ride.description)")
+                availableRidesCount += 1
+            }
+        }
+        guard availableRidesCount > 0 else {
+            Printer.printError("No rides available")
+            return false
+        }
+        return true
+    }
     /// `Reception` object for performing operations in the park.
     private var reception = Reception()
     private var user: User?
     
     func start() {
-        reception.startTimer()
+        startTimer()
         let mainLogin = Login(windowName: "Main Window")
         mainLogin.addCommand(name: "Admin Login", adminLogin)
         mainLogin.addCommand(name: "User Login", userLogin)
         do {
             try mainLogin.createWindow()
         } catch let error {
-            print("Error initiating window:",error)
+            Printer.printError("Error initiating window:", error: error)
             return
         }
     }
     
-    func adminLogin() {
+    private func adminLogin() {
         let adminLogin = Login(windowName: "Admin Login Window")
         adminLogin.addCommand(name: "Create ride", createRide)
         adminLogin.addCommand(name: "Create refreshment", createRefreshment)
@@ -33,21 +116,22 @@ class Controller {
         adminLogin.addCommand(name: "Check time", printCurrentTime)
         adminLogin.addCommand(name: "Show checked-in users", showCheckedInUsers)
         adminLogin.addCommand(name: "Show checked-out users", showCheckedOutUsers)
+        adminLogin.addCommand(name: "Adjust current time", adjustCurrentTime)
         do {
             try adminLogin.createWindow()
         } catch let error {
-            print("Error initiating window:",error)
+            Printer.printError("Error initiating window:", error: error)
             return
         }
     }
     
     /// Allows users to login
-    func userLogin() {
+    private func userLogin() {
         user = userAuth()
         if user != nil {
-            print("Login success!")
+            Printer.printSuccess("Login success")
         } else {
-            print("Login failed!")
+            Printer.printError("Login failed")
             return
         }
         
@@ -59,19 +143,19 @@ class Controller {
         do {
             try userLogin.createWindow()
         } catch let error {
-            print("Error initiating window:", error)
+            Printer.printError("Error initiating window:", error: error)
             return
         }
     }
     
     private func checkOut() {
         if user!.checkOut() == false {
-            print("Checked out already!")
+            Printer.printError("Checked out already")
             return
         }
-        reception.users.remove(user!)
-        reception.usersLog.append(user!)
-        print("Check-out success!")
+        Controller.users.remove(user!)
+        Controller.usersLog.append(user!)
+        Printer.printSuccess("Check-out success")
         user!.showReceipt()
     }
     
@@ -84,7 +168,7 @@ class Controller {
             }
         }
         if ridesCount == 0 {
-            print("All rides visited!")
+            Printer.printError("All rides visited")
             return
         }
         let rideName = InputHandler.getInput("Enter ride name: ")
@@ -103,23 +187,24 @@ class Controller {
             }
         }
         if isValid {
-            print("Ride not available!")
+            Printer.printError("Ride not available")
         }
     }
     
     private func buyRefreshments() {
-        if Reception.refreshments.isEmpty {
-            print("No refreshments available!")
+        if Controller.refreshments.isEmpty {
+            Printer.printError("No refreshments available")
             return
         }
-        for (idx, refreshment) in Reception.refreshments.enumerated() {
+        for (idx, refreshment) in Controller.refreshments.enumerated() {
             print("[\(idx + 1)]\t\t\(refreshment.name)")
         }
         let idx = InputHandler.getInput("Enter refreshment number: ")
-        if Int(idx) != nil && Int(idx)! <= Reception.refreshments.count && Int(idx)! > 0{
-            user!.refreshments.append(Reception.refreshments[Int(idx)! - 1])
+        if Int(idx) != nil && Int(idx)! <= Controller.refreshments.count && Int(idx)! > 0{
+            user!.refreshments.append(Controller.refreshments[Int(idx)! - 1])
+            Printer.printSuccess("Refreshment added")
         }  else {
-            print("Invalid choice!")
+            Printer.printError("Invalid choice")
         }
     }
     
@@ -132,24 +217,24 @@ class Controller {
             /// Creating temporary `User` instance to access in O(1) time
             tempUser = try User(name: name, age: 1, mobile: mobile)
             if tempUser != nil {
-                if let idx = reception.users.firstIndex(of: tempUser!) {
-                    return reception.users[idx]
+                if let idx = Controller.users.firstIndex(of: tempUser!) {
+                    return Controller.users[idx]
                 } else {
                     print("Cannot find user. Check-In instead!")
                     return reception.checkIn()
                 }
             } else {
-                print("Inputs invalid!")
+                Printer.printError("Inputs invalid")
                 return nil
             }
         } catch let error {
-            print(error)
+            Printer.printError("Error", error: error)
             return nil
         }
     }
     
     /// Creates a `Ride` object and appends it to `rides` array in `Reception`
-    func createRide() {
+    private func createRide() {
         let name = InputHandler.getInput("Enter ride name: ")
         let duration = InputHandler.getTimeInput("Enter ride duration in HH:MM format: ")
         let timing = InputHandler.getTimingInput("Enter ride timing details: ")
@@ -166,22 +251,22 @@ class Controller {
         }
         let minCapacity = InputHandler.getIntegerInput("Enter minimum capacity required to start ride: ")
         let maxCapacity = InputHandler.getIntegerInput("Enter maximum capacity: ")
-        Reception.rides.append(
+        Controller.rides.append(
             RideSelector.getRideBasedOnType(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minCapacity, maximumCapacity: maxCapacity)
         )
-        print("Ride \(name) created!")
+        Printer.printSuccess("Ride \(name) created")
     }
     /// Adds maintenance details for a specific `Ride` object
-    func addMaintenance() {
-        guard reception.showAvailableRidesForMaintenance() else {
+    private func addMaintenance() {
+        guard Controller.showAvailableRidesForMaintenance() else {
             return
         }
         let rideNumber = Int(InputHandler.getIntegerInput("Enter ride number: "))
-        if rideNumber <= Reception.rides.count && rideNumber > 0 {
-            let currentRide = Reception.rides[rideNumber - 1]
+        if rideNumber <= Controller.rides.count && rideNumber > 0 {
+            let currentRide = Controller.rides[rideNumber - 1]
             /// Checks if the ride is currently under maintenance
             if currentRide.isUnderMaintenance() {
-                print("Ride is already under maintenance!")
+                Printer.printError("Ride is already under maintenance")
             } else {
                 print("Select maintenance number: ")
                 for (index, maintenanceType) in Maintenance.allCases.enumerated() {
@@ -189,14 +274,14 @@ class Controller {
                 }
                 let maintenanceIdx = InputHandler.getIntegerInput()
                 guard maintenanceIdx > 0 && maintenanceIdx <= Maintenance.allCases.count else {
-                    print("Invalid number!")
+                    Printer.printError("Invalid number")
                     return
                 }
                 for (index, maintenanceType) in Maintenance.allCases.enumerated() {
                     if index + 1 == maintenanceIdx {
                         var maintenanceDuration = InputHandler.getTimeInput("Enter maintenance duration: ")
+                        Controller.rides[rideNumber - 1].add(maintenance: maintenanceType)
                         print("Ride \(currentRide.name) is under maintenance for \(maintenanceDuration.hours) hours and \(maintenanceDuration.minutes) minutes due to \(maintenanceType)!")
-                        Reception.rides[rideNumber - 1].maintenanceDetails = maintenanceType
                         do {
                             let defaultTime = try Time(hours: 0, minutes: 0)
                             /// Maintenance work goes in background
@@ -205,37 +290,50 @@ class Controller {
                                     sleep(1)
                                     maintenanceDuration -= 1
                                 }
-                                Reception.rides[rideNumber - 1].maintenanceDetails = nil
+                                Controller.rides[rideNumber - 1].removeMaintenance()
                                 dump("Maintenance work for ride \(currentRide.name) is over!")
                             }
                         } catch {
-                            print("Time error")
+                            Printer.printError("Time error")
                         }
                         break
                     }
                 }
             }
         } else {
-            print("Invalid ride number!")
+            Printer.printError("Invalid ride number")
         }
     }
     /// Creates a `Refreshment` object and appends to `refreshments` array
-    func createRefreshment() {
+    private func createRefreshment() {
         print("Enter refreshment details: ")
         let name = InputHandler.getInput("Enter name: ")
         let cost = InputHandler.getFloatInput("Enter cost: ")
-        Reception.refreshments.append(Refreshment(name: name, cost: cost))
+        Controller.refreshments.append(Refreshment(name: name, cost: cost))
     }
     
-    func showCheckedInUsers() {
+    private func showCheckedInUsers() {
         reception.showCheckedInUsers()
     }
     
-    func showCheckedOutUsers() {
+    private func showCheckedOutUsers() {
         reception.showCheckedOutUsers()
     }
     
-    func printCurrentTime() {
-        print("Current time: \(Reception.currentTime.description)")
+    static func getCurrentTime() -> Time {
+        return Controller.currentTime
+    }
+    
+    private static func setCurrentTime(time: Time) {
+        Controller.currentTime = time
+    }
+    
+    private func printCurrentTime() {
+        print("Current time: \(Controller.getCurrentTime())")
+    }
+    
+    private func adjustCurrentTime() {
+        let newTime = InputHandler.getTimeInput()
+        Controller.setCurrentTime(time: newTime)
     }
 }

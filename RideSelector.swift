@@ -25,7 +25,7 @@ struct RideSelector {
             case 2:
                 return DryRide(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minimumCapacity, maximumCapacity: maximumCapacity)
             default:
-                print("Invalid number!")
+                Printer.printError("Invalid number")
             }
         }
     }

@@ -36,7 +36,7 @@ class Ride: CustomStringConvertible {
     let minimumCapacity: UInt
     let maximumCapacity: UInt
     /// Consists of `Maintenance` object in case the ride is under maintenance
-    var maintenanceDetails: Maintenance?
+    private var maintenanceDetails: Maintenance?
     var currentlyRunning: Bool = false
     
     var description: String
@@ -68,7 +68,7 @@ class Ride: CustomStringConvertible {
     ///
     /// Returns: A boolean value based on the `timing`.
     func isOpen() -> Bool {
-        let currentTime = Reception.currentTime
+        let currentTime = Controller.getCurrentTime()
         if ((currentTime + duration) <= timing.closingTime) && (currentTime > timing.openingTime) {
             return true
         } else {
@@ -106,7 +106,7 @@ class Ride: CustomStringConvertible {
         for user in usersInside {
             user.currentRide = nil
         }
-        usersInside.removeAll()
+        discardAllUsers()
     }
     /// Adds `user` object to the `usersInside` collection.
     ///
@@ -131,6 +131,22 @@ class Ride: CustomStringConvertible {
             throw RideError.userAlreadyInside
         }
         dump("User: \(user.name) onboarded in \(self.name).")
+    }
+    
+    func add(maintenance: Maintenance) {
+        self.maintenanceDetails = maintenance
+    }
+    
+    func removeMaintenance() {
+        self.maintenanceDetails = nil
+    }
+    
+    func getMaintenanceDetails() -> Maintenance? {
+        return self.maintenanceDetails
+    }
+    
+    func discardAllUsers() {
+        self.usersInside.removeAll()
     }
 }
 

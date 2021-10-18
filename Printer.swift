@@ -21,7 +21,7 @@ struct Printer {
         }
         let dashesCount = windowLength - length
         let titleFiller = String(repeating: "-", count: dashesCount/2)
-        print(titleFiller, title, titleFiller)
+        print(titleFiller, title, titleFiller, "Time: \(Controller.getCurrentTime().description)")
     }
     
     static func get(element input: String) {
@@ -30,5 +30,12 @@ struct Printer {
     
     static func printOption(optionNumber number: Int, optionName name: String) {
         print("[\(number)] \(name)")
+    }
+    static func printError(_ message: String, error: Error? = nil) {
+        print("😕\(message)!", terminator: "")
+        print(error ?? "")
+    }
+    static func printSuccess(_ message: String) {
+        print("🥳\(message)!")
     }
 }
