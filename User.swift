@@ -44,7 +44,17 @@ class User {
     /// Helper variable which stores the status of the `User`
     private var isInside: Bool = false
     /// Stores the `Ride` instance which is currently being visited by the `User`
-    var currentRide: Ride?
+    private var currentRide: Ride?
+    /// Returns true if user is currently in aride, else false
+    var isRiding: Bool {
+        get {
+            if getCurrentRide() == nil {
+                return false
+            } else {
+                return true
+            }
+        }
+    }
     /// Computed property which returns the total amount spent by the user.
     var totalAmountSpent: Float {
         get {
@@ -71,7 +81,7 @@ class User {
     }
     /// Checks-in the user into the park and returns a Boolean based on `isInside`.
     ///
-    /// Returns: Boolean value based on `isInside`.
+    /// - Returns: Boolean value based on `isInside`.
     @discardableResult
     func checkIn() -> Bool {
         if isInside {
@@ -82,7 +92,7 @@ class User {
     }
     /// Checks-out the user into the park and returns a Boolean based on `isInside`.
     ///
-    /// Returns: Boolean value based on `isInside`.
+    /// - Returns: Boolean value based on `isInside`.
     func checkOut() -> Bool {
         if !isInside {
             return false
@@ -92,15 +102,15 @@ class User {
     }
     /// Adds a `Ride` object to the collection `rides` and returns `true` if success.
     ///
-    /// Parameter ride: The `Ride` object to add.
-    /// Returns: `true` if `Ride` object is successfully added to the collection `rides`
-    /// Throws:
-    /// - `Error.UserError.ageGroupUnsatisfied` if age group does not satisfy.
-    /// - `Error.UserError.rideAlreadyAdded` if ride already added.
+    /// - Parameter ride: The `Ride` object to add.
+    /// - Returns: `true` if `Ride` object is successfully added to the collection `rides`
+    /// - Throws:
+    ///   - `Error.UserError.ageGroupUnsatisfied` if age group does not satisfy.
+    ///   - `Error.UserError.rideAlreadyAdded` if ride already added.
     @discardableResult
     func add(ride: Ride) throws -> Bool {
         if ageGroup == .child && ride.allowedAgeGroup == .adult {
-            print("Not allowed")
+            Printer.printError("Not allowed")
             throw Error.UserError.ageGroupUnsatisfied
         }
         if rides.updateValue(false, forKey: ride) == nil {
@@ -115,7 +125,7 @@ class User {
     }
     /// Returns a boolean value to check if a user can check-out.
     ///
-    /// Returns: Boolean value based on the rides visited by the user.
+    /// - Returns: Boolean value based on the rides visited by the user.
     func canCheckOut() -> Bool {
         for (ride, isVisited) in rides {
             if !isVisited && !ride.isUnderMaintenance() {
@@ -125,7 +135,7 @@ class User {
         return true
     }
     /// Prints a receipt listing the amount spent
-    func showReceipt() {
+    func printReceipt() {
         for (ride, isVisited) in rides {
             if ride.isUnderMaintenance() == false {
                 print("\(ride.name)\t\t\(ride.cost)", terminator: " ")
@@ -138,12 +148,12 @@ class User {
         for refreshment in refreshments {
             print("\(refreshment.name)\t\t\(refreshment.cost)")
         }
-        print(String(repeating: "-", count: 15))
+        print(String(repeating: "-", count: 20))
         print("Total:\t\t\(totalAmountSpent)")
     }
     /// Returns the value of `isInside`.
     ///
-    /// Returns: A `String` value based on `isInside` variable.
+    /// - Returns: A `String` value based on `isInside` variable.
     func status() -> String {
         if isInside {
             return "\(name) is inside."
@@ -153,13 +163,13 @@ class User {
     }
     /// Marks the `Ride` object passed as a parameter as visited.
     ///
-    /// Parameter ride: `Ride` object which should be visited.
-    /// Throws:
-    ///  - `RideError.rideNotFound` if ride not found.
-    ///  - `RideError.alreadyVisitedRide` if ride object is already marked visited.
+    /// - Parameter ride: `Ride` object which should be visited.
+    /// - Throws:
+    ///   - `RideError.rideNotFound` if ride not found.
+    ///   - `RideError.alreadyVisitedRide` if ride object is already marked visited.
     func visitRide(ride: Ride) throws {
-        if currentRide != nil {
-            dump("You are currently in \(currentRide!.name), visit after ride ends!")
+        if getCurrentRide() != nil {
+            dump("You are currently in \(getCurrentRide()!.name), visit after ride ends!")
             return
         }
         if rides[ride] == nil {
@@ -168,10 +178,9 @@ class User {
             throw RideError.alreadyVisitedRide
         } else {
             do {
+                // Adding user into the ride
                 try ride.add(user: self)
-                /// Starts the ride to function
-                ride.start()
-                /// Marking the ride as visited.
+                // Marking the ride as visited
                 rides[ride] = true
             } catch RideError.StartError.rideClosed {
                 dump("Cannot visit ride! Ride already closed.\nRide timings: \(ride.timing.description)")
@@ -186,6 +195,25 @@ class User {
         if canCheckOut() {
             dump("All rides visited! User \(name) can check out.")
         }
+    }
+    
+    /// Returns the `Ride` object which the user is currently visiting
+    ///
+    /// - Returns: The `Ride` object which the user is currently visiting
+    func getCurrentRide() -> Ride? {
+        return currentRide
+    }
+    
+    /// Updates the `currentRide` variable with the `Ride` object passed
+    ///
+    /// - Parameter ride: The `Ride` object to be updated with
+    func setCurrentRide(_ ride: Ride) {
+        currentRide = ride
+    }
+    
+    /// Updates the `currentRide` variable to `nil`
+    func removeCurrentRide() {
+        currentRide = nil
     }
 }
 

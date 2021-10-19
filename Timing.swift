@@ -28,6 +28,9 @@ struct Timing: CustomStringConvertible {
     }
     
     /// Static function to check if the `Timing` is valid after modification
+    ///
+    /// - Parameter time: The `Time` object passed to check if it is valid
+    /// - Returns: `true` if the `Time` object is valid, else `false`
     static func isValidTiming(time: Time) -> Bool {
         if time.hours < 24 && time.minutes < 60 {
             return true

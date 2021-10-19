@@ -9,47 +9,47 @@ import Foundation
 struct InputHandler {
     /// Returns `String` input read from user.
     ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: String value read from input.
+    /// - Parameter string: String displayed before reading input.
+    /// - Returns: String value read from input.
     static func getInput(_ string: String = "") -> String {
         var input: String?
         while input == nil {
-            print(string)
+            Printer.get(element: string)
             input = readLine()
         }
         return input!
     }
     /// Returns `UInt` input read from user.
     ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: UInt value read from input.
+    /// - Parameter string: String displayed before reading input.
+    /// - Returns: UInt value read from input.
     static func getIntegerInput(_ string: String = "") -> UInt {
         var input: String?
         while input == nil || UInt(input!) == nil {
-            print(string)
+            Printer.get(element: string)
             input = readLine()
         }
         return UInt(input!)!
     }
     /// Returns `Float` input read from user.
     ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: Float value read from input.
+    /// - Parameter string: String displayed before reading input.
+    /// - Returns: Float value read from input.
     static func getFloatInput(_ string: String = "") -> Float {
         var input: String?
         while input == nil || Float(input!) == nil {
-            print(string)
+            Printer.get(element: string)
             input = readLine()
         }
         return Float(input!)!
     }
     /// Returns `Time` input read from user.
     ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: Time instance read from input.
+    /// - Parameter string: String displayed before reading input.
+    /// - Returns: Time instance read from input.
     static func getTimeInput(_ string: String = "") -> Time {
         while true {
-            print(string)
+            Printer.get(element: string)
             let input = readLine()
             do {
                 guard input != nil else {
@@ -79,14 +79,14 @@ struct InputHandler {
     }
     /// Returns `Timing` input read from user.
     ///
-    /// Parameter string: String displayed before reading input.
-    /// Returns: Timing instance read from input.
+    /// - Parameter string: String displayed before reading input.
+    /// - Returns: Timing instance read from input.
     static func getTimingInput(_ string: String = "") -> Timing {
         while true {
             do {
-                print(string)
-                let openingTime = getTimeInput("Enter opening time in HH:MM format: ")
-                let closingTime = getTimeInput("Enter closing time in HH:MM format: ")
+                Printer.get(element: string)
+                let openingTime = getTimeInput("opening time in HH:MM format")
+                let closingTime = getTimeInput("closing time in HH:MM format")
                 return try Timing(opening: openingTime, closing: closingTime)
             } catch Timing.Error.invalidTiming {
                 Printer.printError("Invalid timing")

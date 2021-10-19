@@ -7,23 +7,32 @@
 
 import Foundation
 
-/// Returns a `Ride` instance based on the ride type from input.
+/// Returns a `RideSelector` instance
 struct RideSelector {
+    /// Returns a `Ride` instance based on the ride type from input with the parameters
+    ///
+    /// - Parameters:
+    ///   - name: The name of the `Ride`
+    ///   - duration: The `Time` object indicating the duration of the `Ride`
+    ///   - timing: The `Timing` of the `Ride`
+    ///   - ageGroup: The allowed age group
+    ///   - minimumCapacity: Minimum capacity required to start the ride
+    /// - Returns: A `Ride` object specific to the ride type
     static func getRideBasedOnType
     (
-        name: String, duration: Time, timing: Timing, ageGroup: AgeGroup,
-        minimumCapacity: UInt, maximumCapacity: UInt
+        name: String, duration: Time, timing: Timing,
+        ageGroup: AgeGroup, minimumCapacity: UInt
     ) -> Ride {
         while true {
             print("Select ride type: ")
-            print("[1] Water ride")
-            print("[2] Dry ride")
-            let input = InputHandler.getIntegerInput()
+            Printer.printOption(optionNumber: 1, optionName: "Water ride")
+            Printer.printOption(optionNumber: 2, optionName: "Dry ride")
+            let input = InputHandler.getIntegerInput("option number")
             switch input {
             case 1:
-                return WaterRide(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minimumCapacity, maximumCapacity: maximumCapacity)
+                return WaterRide(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minimumCapacity)
             case 2:
-                return DryRide(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minimumCapacity, maximumCapacity: maximumCapacity)
+                return DryRide(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minimumCapacity)
             default:
                 Printer.printError("Invalid number")
             }

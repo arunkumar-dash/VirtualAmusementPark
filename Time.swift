@@ -37,13 +37,13 @@ struct Time: Hashable, CustomStringConvertible {
     }
     /// Adds `hours` to the `Time` object
     ///
-    /// Parameter hours: Number of hours to be added as UInt8
+    /// - Parameter hours: Number of hours to be added as UInt8
     mutating func add(hours: UInt8) {
         self.hours = (self.hours + hours) % 24
     }
     /// Adds `minutes` to the `Time` object
     ///
-    /// Parameter minutes: Number of minutes to be added as UInt8
+    /// - Parameter minutes: Number of minutes to be added as UInt8
     mutating func add(minutes: UInt8) {
         let extraHours = (self.minutes + minutes) / 60
         self.minutes = (self.minutes + minutes) % 60

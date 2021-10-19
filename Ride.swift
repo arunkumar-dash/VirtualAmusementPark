@@ -19,7 +19,7 @@ enum RideError: Error {
     case alreadyVisitedRide
 }
 /// Maintenance types as Enumeration
-enum Maintenance: CaseIterable {
+enum Maintenance: String, CaseIterable {
     case waterShortage
     case powerOutage
     case wornOut
@@ -34,16 +34,17 @@ class Ride: CustomStringConvertible {
     /// Set consisting of `User` instances inside this `Ride`
     var usersInside: Set<User> = []
     let minimumCapacity: UInt
-    let maximumCapacity: UInt
     /// Consists of `Maintenance` object in case the ride is under maintenance
     private var maintenanceDetails: Maintenance?
+    /// Boolean variable indicating if the `Ride` is currently running
     var currentlyRunning: Bool = false
+    var rideStarted = false
     
     var description: String
     
     init(
         name: String, cost: Float, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup,
-        minimumCapacity: UInt, maximumCapacity: UInt
+        minimumCapacity: UInt
     ) {
         self.name = name
         self.cost = cost
@@ -51,12 +52,11 @@ class Ride: CustomStringConvertible {
         self.timing = timing
         self.allowedAgeGroup = allowedAgeGroup
         self.minimumCapacity = minimumCapacity
-        self.maximumCapacity = maximumCapacity
         description = "\(name)\t$\(cost)\t\(allowedAgeGroup)"
     }
     /// Returns a boolean value based on `maintenanceDetails` property.
     ///
-    /// Returns: A boolean value based on `maintenanceDetails` property.
+    /// - Returns: A boolean value based on `maintenanceDetails` property.
     func isUnderMaintenance() -> Bool {
         if maintenanceDetails == nil {
             return false
@@ -66,7 +66,7 @@ class Ride: CustomStringConvertible {
     }
     /// Checks `timing` with `currentTime` and returns `true` if `timing` lies after `currentTime`.
     ///
-    /// Returns: A boolean value based on the `timing`.
+    /// - Returns: A boolean value based on the `timing`.
     func isOpen() -> Bool {
         let currentTime = Controller.getCurrentTime()
         if ((currentTime + duration) <= timing.closingTime) && (currentTime > timing.openingTime) {
@@ -104,18 +104,18 @@ class Ride: CustomStringConvertible {
         currentlyRunning = false
         /// Removing `User` instances from the `Ride`
         for user in usersInside {
-            user.currentRide = nil
+            user.removeCurrentRide()
         }
         discardAllUsers()
     }
     /// Adds `user` object to the `usersInside` collection.
     ///
-    /// Parameter user: `User` object which needs to be added.
-    /// Throws:
-    /// - `RideError.StartError.rideClosed` if ride is closed.
-    /// - `RideError.StartError.rideUnderMaintenance` if ride is under maintenance.
-    /// - `RideError.rideFull` if ride is full.
-    /// - `RideError.userAlreadyInside` if user is inside the ride.
+    ///  - Parameter user: `User` object which needs to be added.
+    ///  - Throws:
+    ///   - `RideError.StartError.rideClosed` if ride is closed.
+    ///   - `RideError.StartError.rideUnderMaintenance` if ride is under maintenance.
+    ///   - `RideError.rideFull` if ride is full.
+    ///   - `RideError.userAlreadyInside` if user is inside the ride.
     func add(user: User) throws {
         if isOpen() == false {
             throw RideError.StartError.rideClosed
@@ -123,28 +123,38 @@ class Ride: CustomStringConvertible {
         if isUnderMaintenance() {
             throw RideError.StartError.rideUnderMaintenance
         }
-        user.currentRide = self
-        if usersInside.count == maximumCapacity {
-            throw RideError.rideFull
-        }
+        user.setCurrentRide(self)
         guard usersInside.insert(user).inserted else {
             throw RideError.userAlreadyInside
         }
         dump("User: \(user.name) onboarded in \(self.name).")
+        if rideStarted == false {
+            rideStarted = true
+            start()
+            rideStarted = false
+        }
     }
     
+    /// Updates the `maintenanceDetails` variable with `Maintenance` object
+    ///
+    /// - Parameter maintenance: The `Maintenance` object to be updated
     func add(maintenance: Maintenance) {
         self.maintenanceDetails = maintenance
     }
     
+    /// Marks the `maintenanceDetails` variable as `nil`
     func removeMaintenance() {
         self.maintenanceDetails = nil
     }
     
+    /// Returns the value in `maintenanceDetails`
+    ///
+    /// - Returns: `Maintenance` object from `maintenanceDetails`
     func getMaintenanceDetails() -> Maintenance? {
         return self.maintenanceDetails
     }
     
+    /// Discards all instances inside `usersInside` collection
     func discardAllUsers() {
         self.usersInside.removeAll()
     }
@@ -163,10 +173,10 @@ extension Ride: Hashable {
 
 class WaterRide: Ride {
     init(
-        name: String, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup,
-        minimumCapacity: UInt, maximumCapacity: UInt
+        name: String, duration: Time, timing: Timing,
+        ageGroup allowedAgeGroup: AgeGroup, minimumCapacity: UInt
     ) {
-        super.init(name: name, cost: 25, duration: duration, timing: timing, ageGroup: allowedAgeGroup, minimumCapacity: minimumCapacity, maximumCapacity: maximumCapacity)
+        super.init(name: name, cost: 25, duration: duration, timing: timing, ageGroup: allowedAgeGroup, minimumCapacity: minimumCapacity)
     }
     /// Starts the `WaterRide`.
     override func start() {
@@ -177,10 +187,13 @@ class WaterRide: Ride {
 
 class DryRide: Ride {
     init(
-        name: String, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup,
-        minimumCapacity: UInt, maximumCapacity: UInt
+        name: String, duration: Time, timing: Timing, ageGroup
+        allowedAgeGroup: AgeGroup, minimumCapacity: UInt
     ) {
-        super.init(name: name, cost: 20, duration: duration, timing: timing, ageGroup: allowedAgeGroup, minimumCapacity: minimumCapacity, maximumCapacity: maximumCapacity)
+        super.init(
+            name: name, cost: 20, duration: duration, timing: timing,
+                   ageGroup: allowedAgeGroup, minimumCapacity: minimumCapacity
+        )
     }
     /// Starts the `DryRide`.
     override func start() {

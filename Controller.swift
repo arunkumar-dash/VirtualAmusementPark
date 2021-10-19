@@ -9,11 +9,11 @@ import Foundation
 /// Returns a controller object to handle the execution of the amusement park.
 class Controller {
     /// A set consisting of `User` instances.
-    static var users: Set<User> = []
+    private static var checkedInUsers: Set<User> = []
     /// An array consisting of `User`s checked-out.
-    static var usersLog: Array<User> = []
+    private static var checkedOutUsers: Array<User> = []
     /// A static array consisting of rides in the park.
-    static var rides: Array<Ride> = []
+    private static var rides: Array<Ride> = []
     /// Static variable which stores the time since start of execution.
     private static var currentTime: Time {
         get {
@@ -54,14 +54,14 @@ class Controller {
     
     /// Prints the available rides and returns false if no rides available, else true.
     ///
-    /// Returns: Boolean value based on the available rides count.
+    /// - Returns: Boolean value based on the available rides count.
     @discardableResult
     static func showAvailableRides() -> Bool {
         print("Available rides: ")
         var availableRidesCount = 0
-        for (count, ride) in Controller.rides.enumerated() {
+        for (index, ride) in Controller.rides.enumerated() {
             if ride.isUnderMaintenance() == false && ride.currentlyRunning == false {
-                print("[\(count + 1)]\t\(ride.description)")
+                Printer.printOption(optionNumber: index + 1, optionName: ride.description)
                 availableRidesCount += 1
             }
         }
@@ -74,14 +74,14 @@ class Controller {
     
     /// Prints the available rides even if it is currently running and returns false if no rides available, else true.
     ///
-    /// Returns: Boolean value based on the available rides count.
+    /// - Returns: Boolean value based on the available rides count.
     @discardableResult
     private static func showAvailableRidesForMaintenance() -> Bool {
         print("Available rides: ")
         var availableRidesCount = 0
-        for (count, ride) in Controller.rides.enumerated() {
+        for (index, ride) in Controller.rides.enumerated() {
             if ride.isUnderMaintenance() == false {
-                print("[\(count + 1)]\t\(ride.description)")
+                Printer.printOption(optionNumber: index + 1, optionName: ride.description)
                 availableRidesCount += 1
             }
         }
@@ -93,8 +93,9 @@ class Controller {
     }
     /// `Reception` object for performing operations in the park.
     private var reception = Reception()
+    /// Stores a `User` object
     private var user: User?
-    
+    /// Starts the functionality of the `Controller`
     func start() {
         startTimer()
         let mainLogin = Login(windowName: "Main Window")
@@ -107,7 +108,7 @@ class Controller {
             return
         }
     }
-    
+    /// Allows admin to login
     private func adminLogin() {
         let adminLogin = Login(windowName: "Admin Login Window")
         adminLogin.addCommand(name: "Create ride", createRide)
@@ -127,14 +128,13 @@ class Controller {
     
     /// Allows users to login
     private func userLogin() {
-        user = userAuth()
+        user = authenticateUser()
         if user != nil {
             Printer.printSuccess("Login success")
         } else {
             Printer.printError("Login failed")
             return
         }
-        
         /// Access options for user
         let userLogin = Login(windowName: "User Login Window")
         userLogin.addCommand(name: "Visit Ride", visitRide)
@@ -148,17 +148,19 @@ class Controller {
         }
     }
     
+    /// Checks out `user`
     private func checkOut() {
         if user!.checkOut() == false {
             Printer.printError("Checked out already")
             return
         }
-        Controller.users.remove(user!)
-        Controller.usersLog.append(user!)
+        Controller.checkedInUsers.remove(user!)
+        Controller.checkedOutUsers.append(user!)
         Printer.printSuccess("Check-out success")
-        user!.showReceipt()
+        user!.printReceipt()
     }
     
+    /// Marks a ride as visited for `user`
     private func visitRide() {
         var ridesCount = 0
         for ride in user!.rides {
@@ -171,7 +173,7 @@ class Controller {
             Printer.printError("All rides visited")
             return
         }
-        let rideName = InputHandler.getInput("Enter ride name: ")
+        let rideName = InputHandler.getInput("ride name")
         var isValid = true
         for ride in user!.rides {
             if ride.key.name == rideName {
@@ -179,7 +181,7 @@ class Controller {
                     do {
                         try self.user!.visitRide(ride: ride.key)
                     } catch let error {
-                        print(error)
+                        Printer.printError("Error", error: error)
                     }
                 }
                 isValid = false
@@ -191,34 +193,38 @@ class Controller {
         }
     }
     
+    /// Adds `Refreshment` instance to `User`'s `refreshments` collection
     private func buyRefreshments() {
         if Controller.refreshments.isEmpty {
             Printer.printError("No refreshments available")
             return
         }
-        for (idx, refreshment) in Controller.refreshments.enumerated() {
-            print("[\(idx + 1)]\t\t\(refreshment.name)")
+        for (index, refreshment) in Controller.refreshments.enumerated() {
+            Printer.printOption(optionNumber: index + 1, optionName: refreshment.name)
         }
-        let idx = InputHandler.getInput("Enter refreshment number: ")
-        if Int(idx) != nil && Int(idx)! <= Controller.refreshments.count && Int(idx)! > 0{
-            user!.refreshments.append(Controller.refreshments[Int(idx)! - 1])
+        let index = InputHandler.getInput("refreshment number")
+        if Int(index) != nil && Int(index)! <= Controller.refreshments.count && Int(index)! > 0{
+            user!.refreshments.append(Controller.refreshments[Int(index)! - 1])
             Printer.printSuccess("Refreshment added")
         }  else {
             Printer.printError("Invalid choice")
         }
     }
     
-    private func userAuth() -> User? {
+    /// Returns a `User` instance based on the details from input
+    ///
+    /// - Returns: `User` instance from `checkedInUsers`
+    private func authenticateUser() -> User? {
         print("Attempting to login...")
-        let name = InputHandler.getInput("Enter name: ")
-        let mobile = InputHandler.getInput("Enter mobile: ")
+        let name = InputHandler.getInput("name")
+        let mobile = InputHandler.getInput("mobile")
         var tempUser: User?
         do {
             /// Creating temporary `User` instance to access in O(1) time
             tempUser = try User(name: name, age: 1, mobile: mobile)
             if tempUser != nil {
-                if let idx = Controller.users.firstIndex(of: tempUser!) {
-                    return Controller.users[idx]
+                if let index = Controller.checkedInUsers.firstIndex(of: tempUser!) {
+                    return Controller.checkedInUsers[index]
                 } else {
                     print("Cannot find user. Check-In instead!")
                     return reception.checkIn()
@@ -235,51 +241,55 @@ class Controller {
     
     /// Creates a `Ride` object and appends it to `rides` array in `Reception`
     private func createRide() {
-        let name = InputHandler.getInput("Enter ride name: ")
-        let duration = InputHandler.getTimeInput("Enter ride duration in HH:MM format: ")
-        let timing = InputHandler.getTimingInput("Enter ride timing details: ")
-        let age = InputHandler.getIntegerInput("Enter minimum age category(<17 for children, >=18 for adults): ")
+        let name = InputHandler.getInput("ride name")
+        let duration = InputHandler.getTimeInput("ride duration in HH:MM format")
+        let timing = InputHandler.getTimingInput()
+        print("Select minimum age category:")
+        Printer.printOption(optionNumber: 1, optionName: "Child")
+        Printer.printOption(optionNumber: 2, optionName: "Adult")
+        print("Default category: \(AgeGroup.adult)")
+        let age = InputHandler.getIntegerInput("option number")
         var ageGroup: AgeGroup {
             switch age {
-            case ...17:
+            case 1:
                 return .child
-            case 18...:
+            case 2:
                 return .adult
             default:
                 return .adult
             }
         }
-        let minCapacity = InputHandler.getIntegerInput("Enter minimum capacity required to start ride: ")
-        let maxCapacity = InputHandler.getIntegerInput("Enter maximum capacity: ")
+        let minCapacity = InputHandler.getIntegerInput("minimum capacity required to start ride")
         Controller.rides.append(
-            RideSelector.getRideBasedOnType(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minCapacity, maximumCapacity: maxCapacity)
+            RideSelector.getRideBasedOnType(name: name, duration: duration, timing: timing, ageGroup: ageGroup, minimumCapacity: minCapacity)
         )
         Printer.printSuccess("Ride \(name) created")
     }
+    
     /// Adds maintenance details for a specific `Ride` object
     private func addMaintenance() {
         guard Controller.showAvailableRidesForMaintenance() else {
             return
         }
-        let rideNumber = Int(InputHandler.getIntegerInput("Enter ride number: "))
+        let rideNumber = Int(InputHandler.getIntegerInput("ride number"))
         if rideNumber <= Controller.rides.count && rideNumber > 0 {
             let currentRide = Controller.rides[rideNumber - 1]
             /// Checks if the ride is currently under maintenance
             if currentRide.isUnderMaintenance() {
                 Printer.printError("Ride is already under maintenance")
             } else {
-                print("Select maintenance number: ")
+                Printer.get(element: "maintenance number")
                 for (index, maintenanceType) in Maintenance.allCases.enumerated() {
-                    print("[\(index + 1)]\t\t\(maintenanceType)")
+                    Printer.printOption(optionNumber: index + 1, optionName: maintenanceType.rawValue)
                 }
-                let maintenanceIdx = InputHandler.getIntegerInput()
-                guard maintenanceIdx > 0 && maintenanceIdx <= Maintenance.allCases.count else {
+                let maintenanceIndex = InputHandler.getIntegerInput()
+                guard maintenanceIndex > 0 && maintenanceIndex <= Maintenance.allCases.count else {
                     Printer.printError("Invalid number")
                     return
                 }
                 for (index, maintenanceType) in Maintenance.allCases.enumerated() {
-                    if index + 1 == maintenanceIdx {
-                        var maintenanceDuration = InputHandler.getTimeInput("Enter maintenance duration: ")
+                    if index + 1 == maintenanceIndex {
+                        var maintenanceDuration = InputHandler.getTimeInput("maintenance duration")
                         Controller.rides[rideNumber - 1].add(maintenance: maintenanceType)
                         print("Ride \(currentRide.name) is under maintenance for \(maintenanceDuration.hours) hours and \(maintenanceDuration.minutes) minutes due to \(maintenanceType)!")
                         do {
@@ -306,34 +316,119 @@ class Controller {
     }
     /// Creates a `Refreshment` object and appends to `refreshments` array
     private func createRefreshment() {
-        print("Enter refreshment details: ")
-        let name = InputHandler.getInput("Enter name: ")
-        let cost = InputHandler.getFloatInput("Enter cost: ")
+        let name = InputHandler.getInput("refreshment name")
+        let cost = InputHandler.getFloatInput("refreshment cost")
         Controller.refreshments.append(Refreshment(name: name, cost: cost))
+        Printer.printSuccess("Refreshment created")
     }
     
-    private func showCheckedInUsers() {
-        reception.showCheckedInUsers()
-    }
-    
-    private func showCheckedOutUsers() {
-        reception.showCheckedOutUsers()
-    }
-    
+    /// Returns value stored in `currentTime`
+    ///
+    /// - Returns: A `Time` instance stored in `currentTime`
     static func getCurrentTime() -> Time {
         return Controller.currentTime
     }
     
+    /// Updates the `currentTime` variable with the `Time` object passed in argument
+    ///
+    ///  - Parameter time: `Time` object to be updated
     private static func setCurrentTime(time: Time) {
         Controller.currentTime = time
     }
     
+    /// Prints `currentTime` to stdout
     private func printCurrentTime() {
         print("Current time: \(Controller.getCurrentTime())")
     }
     
+    /// Updates `currentTime` with `Time`object collected from input
     private func adjustCurrentTime() {
         let newTime = InputHandler.getTimeInput()
         Controller.setCurrentTime(time: newTime)
+    }
+    
+    /// Prints `checkedOutUsers`.
+    private func showCheckedOutUsers() {
+        if Controller.checkedOutUsers.isEmpty {
+            Printer.printError("No users found")
+            return
+        }
+        for oldUser in Controller.checkedOutUsers {
+            print("Name: \(oldUser.name)\t\tAge: \(oldUser.age)\t\tMobile: \(oldUser.mobile)")
+        }
+    }
+    
+    /// Prints `checkedInUsers`.
+    private func showCheckedInUsers() {
+        if Controller.checkedInUsers.isEmpty {
+            Printer.printError("No users found")
+            return
+        }
+        for user in Controller.checkedInUsers {
+            print("Name: \(user.name)\t\tAge: \(user.age)\t\tMobile: \(user.mobile)", terminator: " ")
+            if user.isRiding {
+                print("Currently in \(user.getCurrentRide()!.name)")
+            }
+            print("")
+        }
+        print("Total user checked-in: \(totalUsersCheckedIn())")
+    }
+    
+    /// Returns count of `checkedInUsers`
+    ///
+    /// - Returns: Count of `checkedInUsers`
+    private func totalUsersCheckedIn() -> Int {
+        return Controller.checkedInUsers.count
+    }
+    
+    /// Returns `rides` variable
+    ///
+    /// - Returns: An Array object of `Ride` type
+    static func getRides() -> Array<Ride> {
+        return Controller.rides
+    }
+    
+    /// - Returns a `Ride` object from the `rides` collection in the given index
+    ///
+    /// - Parameter index: The index of the `rides` Array
+    /// - Returns: A `Ride` object at the given `index`
+    static func getRide(index: Int) -> Ride {
+        return Controller.rides[index]
+    }
+    
+    /// Updates the `rides` collection with the given value at the given index
+    ///
+    /// - Parameters:
+    ///   - index: The index of the `rides` array
+    ///   - value: `Ride` object to be updated
+    static func setRide(index: Int, value: Ride) {
+        Controller.rides[index] = value
+    }
+    
+    
+    /// Adds a new `User` object to the `checkedInUsers` collection
+    ///
+    /// - Parameter user: The `User` object to be inserted
+    static func addNewUser(_ user: User) {
+        checkedInUsers.insert(user)
+    }
+    
+    /// Removes and returns the `User` object from the `checkdeInUsers` collection and appends it to the `checkedOutUsers` collection
+    ///
+    /// - Parameter user: The `User` object to be removed
+    /// - Returns: A `User` object which was removed
+    static func removeUser(user: User) -> User? {
+        let oldUser = checkedInUsers.remove(user)
+        if oldUser != nil {
+            checkedOutUsers.append(oldUser!)
+        }
+        return oldUser
+    }
+    
+    /// Returns the value in `checkedInUsers` collection
+    ///
+    /// - Returns: A Set of `User` type stored in `checkedInUsers` collection
+    static func getCheckedInUsers() -> Set<User> {
+        return checkedInUsers
     }
 }
