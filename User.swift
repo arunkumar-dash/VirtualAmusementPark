@@ -13,28 +13,8 @@ enum AgeGroup {
     case child
 }
 
-protocol UserProtocol: Hashable {
-    var name: String { get }
-    var age: UInt8 { get }
-    var ageGroup: AgeGroup { get }
-    var mobile: String { get }
-    func isRiding() -> Bool
-    var totalAmountSpent: Float { get }
-    func checkIn() -> Bool
-    func checkOut() -> Bool
-    func add(ride: Ride) throws -> Bool
-    func add(refreshment: Refreshment)
-    func canCheckOut() -> Bool
-    func printReceipt()
-    func visit(ride: Ride) throws
-    func getCurrentRide() -> Ride?
-    func setCurrentRide(_ ride: Ride)
-    func removeCurrentRide()
-    func getRidesVisitedPair() -> Dictionary<Ride, Bool>
-    func appendRefreshment(_ refreshment: Refreshment)
-}
 /// Returns an `User` instance
-class User: UserProtocol {
+class User {
     
     /// Enumeration consisting of Errors possible due to user input
     enum Error: Swift.Error {
