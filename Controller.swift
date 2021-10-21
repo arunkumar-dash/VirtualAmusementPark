@@ -163,7 +163,7 @@ class Controller {
     /// Marks a ride as visited for `user`
     private func visitRide() {
         var ridesCount = 0
-        for ride in user!.rides {
+        for ride in user!.getRidesVisitedPair() {
             if ride.value == false {
                 ridesCount += 1
                 print(ride.key.description)
@@ -175,11 +175,11 @@ class Controller {
         }
         let rideName = InputHandler.getInput("ride name")
         var isValid = true
-        for ride in user!.rides {
+        for ride in user!.getRidesVisitedPair() {
             if ride.key.name == rideName {
                 DispatchQueue.global().async {
                     do {
-                        try self.user!.visitRide(ride: ride.key)
+                        try self.user!.visit(ride: ride.key)
                     } catch let error {
                         Printer.printError("Error", error: error)
                     }
@@ -204,7 +204,7 @@ class Controller {
         }
         let index = InputHandler.getInput("refreshment number")
         if Int(index) != nil && Int(index)! <= Controller.refreshments.count && Int(index)! > 0{
-            user!.refreshments.append(Controller.refreshments[Int(index)! - 1])
+            user!.appendRefreshment(Controller.refreshments[Int(index)! - 1])
             Printer.printSuccess("Refreshment added")
         }  else {
             Printer.printError("Invalid choice")
@@ -366,7 +366,7 @@ class Controller {
         }
         for user in Controller.checkedInUsers {
             print("Name: \(user.name)\t\tAge: \(user.age)\t\tMobile: \(user.mobile)", terminator: " ")
-            if user.isRiding {
+            if user.isRiding() {
                 print("Currently in \(user.getCurrentRide()!.name)")
             }
             print("")

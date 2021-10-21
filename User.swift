@@ -12,8 +12,30 @@ enum AgeGroup {
     case adult
     case child
 }
+
+protocol UserProtocol: Hashable {
+    var name: String { get }
+    var age: UInt8 { get }
+    var ageGroup: AgeGroup { get }
+    var mobile: String { get }
+    func isRiding() -> Bool
+    var totalAmountSpent: Float { get }
+    func checkIn() -> Bool
+    func checkOut() -> Bool
+    func add(ride: Ride) throws -> Bool
+    func add(refreshment: Refreshment)
+    func canCheckOut() -> Bool
+    func printReceipt()
+    func visit(ride: Ride) throws
+    func getCurrentRide() -> Ride?
+    func setCurrentRide(_ ride: Ride)
+    func removeCurrentRide()
+    func getRidesVisitedPair() -> Dictionary<Ride, Bool>
+    func appendRefreshment(_ refreshment: Refreshment)
+}
 /// Returns an `User` instance
-class User {
+class User: UserProtocol {
+    
     /// Enumeration consisting of Errors possible due to user input
     enum Error: Swift.Error {
         case invalidMobileFormat
@@ -38,21 +60,19 @@ class User {
     }
     let mobile: String
     /// Dictionary to check if the user has visited the ride
-    var rides: Dictionary<Ride, Bool> = [:]
+    private var rides: Dictionary<Ride, Bool> = [:]
     /// Array consisting of `Refreshment` objects
-    var refreshments: Array<Refreshment> = []
+    private var refreshments: Array<Refreshment> = []
     /// Helper variable which stores the status of the `User`
     private var isInside: Bool = false
     /// Stores the `Ride` instance which is currently being visited by the `User`
     private var currentRide: Ride?
     /// Returns true if user is currently in aride, else false
-    var isRiding: Bool {
-        get {
-            if getCurrentRide() == nil {
-                return false
-            } else {
-                return true
-            }
+    func isRiding() -> Bool {
+        if getCurrentRide() == nil {
+            return false
+        } else {
+            return true
         }
     }
     /// Computed property which returns the total amount spent by the user.
@@ -151,23 +171,13 @@ class User {
         print(String(repeating: "-", count: 20))
         print("Total:\t\t\(totalAmountSpent)")
     }
-    /// Returns the value of `isInside`.
-    ///
-    /// - Returns: A `String` value based on `isInside` variable.
-    func status() -> String {
-        if isInside {
-            return "\(name) is inside."
-        } else {
-            return "\(name) is outside."
-        }
-    }
     /// Marks the `Ride` object passed as a parameter as visited.
     ///
     /// - Parameter ride: `Ride` object which should be visited.
     /// - Throws:
     ///   - `RideError.rideNotFound` if ride not found.
     ///   - `RideError.alreadyVisitedRide` if ride object is already marked visited.
-    func visitRide(ride: Ride) throws {
+    func visit(ride: Ride) throws {
         if getCurrentRide() != nil {
             dump("You are currently in \(getCurrentRide()!.name), visit after ride ends!")
             return
@@ -214,6 +224,14 @@ class User {
     /// Updates the `currentRide` variable to `nil`
     func removeCurrentRide() {
         currentRide = nil
+    }
+    
+    func getRidesVisitedPair() -> Dictionary<Ride, Bool> {
+        return rides
+    }
+    
+    func appendRefreshment(_ refreshment: Refreshment) {
+        refreshments.append(refreshment)
     }
 }
 
