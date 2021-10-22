@@ -25,14 +25,14 @@ enum Maintenance: String, CaseIterable {
     case wornOut
 }
 /// Returns a `Ride` object
-class Ride: CustomStringConvertible {
+class Ride<T: TimeProtocol, U: UserRideProtocol>: CustomStringConvertible {
     let name: String
     let cost: Float
-    let duration: Time
-    let timing: Timing
+    let duration: T
+    let timing: Timing<T>
     let allowedAgeGroup: AgeGroup
     /// Set consisting of `User` instances inside this `Ride`
-    var usersInside: Set<User> = []
+    var usersInside: Set<U> = []
     let minimumCapacity: UInt
     /// Consists of `Maintenance` object in case the ride is under maintenance
     private var maintenanceDetails: Maintenance?
@@ -43,7 +43,7 @@ class Ride: CustomStringConvertible {
     var description: String
     
     init(
-        name: String, cost: Float, duration: Time, timing: Timing, ageGroup allowedAgeGroup: AgeGroup,
+        name: String, cost: Float, duration: T, timing: Timing<T>, ageGroup allowedAgeGroup: AgeGroup,
         minimumCapacity: UInt
     ) {
         self.name = name
@@ -68,7 +68,7 @@ class Ride: CustomStringConvertible {
     ///
     /// - Returns: A boolean value based on the `timing`.
     func isOpen() -> Bool {
-        let currentTime = Controller.getCurrentTime()
+        let currentTime = Controller.getCurrentTime() as! T
         if ((currentTime + duration) <= timing.closingTime) && (currentTime > timing.openingTime) {
             return true
         } else {
@@ -116,7 +116,7 @@ class Ride: CustomStringConvertible {
     ///   - `RideError.StartError.rideUnderMaintenance` if ride is under maintenance.
     ///   - `RideError.rideFull` if ride is full.
     ///   - `RideError.userAlreadyInside` if user is inside the ride.
-    func add(user: User) throws {
+    func add(user: U) throws {
         if isOpen() == false {
             throw RideError.StartError.rideClosed
         }
@@ -171,9 +171,9 @@ extension Ride: Hashable {
     }
 }
 
-class WaterRide: Ride {
+class WaterRide<T: TimeProtocol, U: UserRideProtocol>: Ride<T, U> {
     init(
-        name: String, duration: Time, timing: Timing,
+        name: String, duration: T, timing: Timing<T>,
         ageGroup allowedAgeGroup: AgeGroup, minimumCapacity: UInt
     ) {
         super.init(name: name, cost: 25, duration: duration, timing: timing, ageGroup: allowedAgeGroup, minimumCapacity: minimumCapacity)
@@ -185,9 +185,9 @@ class WaterRide: Ride {
     }
 }
 
-class DryRide: Ride {
+class DryRide<T: TimeProtocol, U: UserRideProtocol>: Ride<T, U> {
     init(
-        name: String, duration: Time, timing: Timing, ageGroup
+        name: String, duration: T, timing: Timing<T>, ageGroup
         allowedAgeGroup: AgeGroup, minimumCapacity: UInt
     ) {
         super.init(

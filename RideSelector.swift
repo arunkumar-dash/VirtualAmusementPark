@@ -8,7 +8,7 @@
 import Foundation
 
 /// Returns a `RideSelector` instance
-struct RideSelector {
+struct RideSelector<T: TimeProtocol, U: UserRideProtocol> {
     /// Returns a `Ride` instance based on the ride type from input with the parameters
     ///
     /// - Parameters:
@@ -20,9 +20,9 @@ struct RideSelector {
     /// - Returns: A `Ride` object specific to the ride type
     static func getRideBasedOnType
     (
-        name: String, duration: Time, timing: Timing,
+        name: String, duration: T, timing: Timing<T>,
         ageGroup: AgeGroup, minimumCapacity: UInt
-    ) -> Ride {
+    ) -> Ride<T, U> {
         while true {
             print("Select ride type: ")
             Printer.printOption(optionNumber: 1, optionName: "Water ride")

@@ -13,8 +13,18 @@ func -=(lhs: inout Time, rhs: Int) {
     lhs.hours = UInt8((totalMinutes / 60) % 24)
     lhs.minutes = UInt8(totalMinutes % 60)
 }
+
+protocol TimeProtocol: Comparable, Hashable, CustomStringConvertible {
+    var hours: UInt8 { get }
+    var minutes: UInt8 { get }
+    var description: String { get }
+    mutating func add(hours: UInt8)
+    mutating func add(minutes: UInt8)
+    static func <(lhs: Self, rhs: Self) -> Bool
+    static func +(lhs: Self, rhs: Self) -> Self
+}
 /// Returns a `Time` object consisting of hours, minutes
-struct Time: Hashable, CustomStringConvertible {
+struct Time: TimeProtocol {
     enum Error: Swift.Error {
         case invalidHour
         case invalidMinute
@@ -57,8 +67,8 @@ struct Time: Hashable, CustomStringConvertible {
         return finalTime
     }
 }
-
-extension Time: Comparable {
+/// Conforming to Comparable
+extension Time: Comparable{
     /// Overloaded `==` operator for two `Time` objects as a requirement for `Equatable`
     static func ==(lhs: Time, rhs: Time) -> Bool {
         return lhs.hours == rhs.hours && lhs.minutes == rhs.minutes

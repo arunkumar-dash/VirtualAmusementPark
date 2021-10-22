@@ -8,14 +8,14 @@
 import Foundation
 /// Main entry to the amusement park.
 /// Contains instances of users entered into the park through this reception.
-struct Reception {
+struct Reception<T: TimeProtocol, U: UserRideProtocol, UR: UserRideProtocol> {
     
     /// Adds `User` objects into `checkedInUsers` set
     ///
     /// - Returns: A `User` object which checked in
     @discardableResult
-    mutating func checkIn() -> User?{
-        var user: User?
+    mutating func checkIn() -> U?{
+        var user: U?
         return DispatchQueue.global(qos: .userInteractive).sync {
             let userName: String
             let userAge: UInt8
@@ -26,14 +26,14 @@ struct Reception {
             /// Error handling mobile number
             while true {
                 do {
-                    user = try User(name: userName, age: userAge, mobile: mobile)
-                    if Controller.getCheckedInUsers().contains(user!) {
-                        throw User.Error.userAlreadyExists
+                    user = try User<T, U, UR>(name: userName, age: userAge, mobile: mobile) as? U
+                    if Controller.getCheckedInUsers().contains(user! as! User<T, U, UR>) {
+                        throw User<T, U, UR>.Error.userAlreadyExists
                     }
                     user!.checkIn()
-                    Controller.addNewUser(user!)
+                    Controller.addNewUser(user! as! User<T, U, UR>)
                     break
-                } catch User.Error.invalidMobileFormat {
+                } catch User<T, U, UR>.Error.invalidMobileFormat {
                     mobile = InputHandler.getInput("a 10-digit mobile number")
                 } catch let error {
                     Printer.printError("User check-in was unsuccessful", error: error)
@@ -80,9 +80,9 @@ struct Reception {
         DispatchQueue.global().sync {
             let name = InputHandler.getInput("name")
             let mobile = InputHandler.getInput("mobile")
-            var tempUser: User?
+            var tempUser: U?
             do {
-                tempUser = try User(name: name, age: 1, mobile: mobile)
+                tempUser = try User<T, U, UR>(name: name, age: 1, mobile: mobile) as? U
                 if tempUser != nil {
                     if let oldUser = Controller.removeUser(user: tempUser!) {
                         oldUser.printReceipt()

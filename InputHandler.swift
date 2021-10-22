@@ -81,14 +81,14 @@ struct InputHandler {
     ///
     /// - Parameter string: String displayed before reading input.
     /// - Returns: Timing instance read from input.
-    static func getTimingInput(_ string: String = "") -> Timing {
+    static func getTimingInput(_ string: String = "") -> Timing<Time> {
         while true {
             do {
                 Printer.get(element: string)
                 let openingTime = getTimeInput("opening time in HH:MM format")
                 let closingTime = getTimeInput("closing time in HH:MM format")
                 return try Timing(opening: openingTime, closing: closingTime)
-            } catch Timing.Error.invalidTiming {
+            } catch Timing<Time>.Error.invalidTiming {
                 Printer.printError("Invalid timing")
             } catch {
                 Printer.printError("Unexpected error occured")

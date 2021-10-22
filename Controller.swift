@@ -9,11 +9,11 @@ import Foundation
 /// Returns a controller object to handle the execution of the amusement park.
 class Controller {
     /// A set consisting of `User` instances.
-    private static var checkedInUsers: Set<User> = []
+    private static var checkedInUsers: Set<User<Time, User>> = []
     /// An array consisting of `User`s checked-out.
-    private static var checkedOutUsers: Array<User> = []
+    private static var checkedOutUsers: Array<User<Time>> = []
     /// A static array consisting of rides in the park.
-    private static var rides: Array<Ride> = []
+    private static var rides: Array<Ride<Time, User<Time>>> = []
     /// Static variable which stores the time since start of execution.
     private static var currentTime: Time {
         get {
@@ -92,9 +92,9 @@ class Controller {
         return true
     }
     /// `Reception` object for performing operations in the park.
-    private var reception = Reception()
+    private var reception = Reception<User<Time, User>>()
     /// Stores a `User` object
-    private var user: User?
+    private var user: User<Time, User, User1>?
     /// Starts the functionality of the `Controller`
     func start() {
         startTimer()
@@ -214,14 +214,14 @@ class Controller {
     /// Returns a `User` instance based on the details from input
     ///
     /// - Returns: `User` instance from `checkedInUsers`
-    private func authenticateUser() -> User? {
+    private func authenticateUser() -> User<Time>? {
         print("Attempting to login...")
         let name = InputHandler.getInput("name")
         let mobile = InputHandler.getInput("mobile")
-        var tempUser: User?
+        var tempUser: User<Time>?
         do {
             /// Creating temporary `User` instance to access in O(1) time
-            tempUser = try User(name: name, age: 1, mobile: mobile)
+            tempUser = try User<Time>(name: name, age: 1, mobile: mobile)
             if tempUser != nil {
                 if let index = Controller.checkedInUsers.firstIndex(of: tempUser!) {
                     return Controller.checkedInUsers[index]
@@ -384,7 +384,7 @@ class Controller {
     /// Returns `rides` variable
     ///
     /// - Returns: An Array object of `Ride` type
-    static func getRides() -> Array<Ride> {
+    static func getRides() -> Array<Ride<Time, User<Time>>> {
         return Controller.rides
     }
     
@@ -392,7 +392,7 @@ class Controller {
     ///
     /// - Parameter index: The index of the `rides` Array
     /// - Returns: A `Ride` object at the given `index`
-    static func getRide(index: Int) -> Ride {
+    static func getRide(index: Int) -> Ride<Time, User<Time>> {
         return Controller.rides[index]
     }
     
@@ -401,7 +401,7 @@ class Controller {
     /// - Parameters:
     ///   - index: The index of the `rides` array
     ///   - value: `Ride` object to be updated
-    static func setRide(index: Int, value: Ride) {
+    static func setRide(index: Int, value: Ride<Time, User<Time>>) {
         Controller.rides[index] = value
     }
     
@@ -409,7 +409,7 @@ class Controller {
     /// Adds a new `User` object to the `checkedInUsers` collection
     ///
     /// - Parameter user: The `User` object to be inserted
-    static func addNewUser(_ user: User) {
+    static func addNewUser(_ user: User<Time>) {
         checkedInUsers.insert(user)
     }
     
@@ -417,7 +417,7 @@ class Controller {
     ///
     /// - Parameter user: The `User` object to be removed
     /// - Returns: A `User` object which was removed
-    static func removeUser(user: User) -> User? {
+    static func removeUser(user: User<Time>) -> User<Time>? {
         let oldUser = checkedInUsers.remove(user)
         if oldUser != nil {
             checkedOutUsers.append(oldUser!)
@@ -428,7 +428,7 @@ class Controller {
     /// Returns the value in `checkedInUsers` collection
     ///
     /// - Returns: A Set of `User` type stored in `checkedInUsers` collection
-    static func getCheckedInUsers() -> Set<User> {
+    static func getCheckedInUsers() -> Set<User<Time>> {
         return checkedInUsers
     }
 }
