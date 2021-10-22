@@ -25,7 +25,7 @@ enum Maintenance: String, CaseIterable {
     case wornOut
 }
 /// Returns a `Ride` object
-class Ride<T: TimeProtocol, U: UserRideProtocol>: CustomStringConvertible {
+class Ride<T: TimeProtocol, U: UserProtocol>: CustomStringConvertible {
     let name: String
     let cost: Float
     let duration: T
@@ -123,7 +123,8 @@ class Ride<T: TimeProtocol, U: UserRideProtocol>: CustomStringConvertible {
         if isUnderMaintenance() {
             throw RideError.StartError.rideUnderMaintenance
         }
-        user.setCurrentRide(self)
+        print(type(of: self))
+//        user.setCurrentRide(self)
         guard usersInside.insert(user).inserted else {
             throw RideError.userAlreadyInside
         }
@@ -171,7 +172,7 @@ extension Ride: Hashable {
     }
 }
 
-class WaterRide<T: TimeProtocol, U: UserRideProtocol>: Ride<T, U> {
+class WaterRide<T: TimeProtocol, U: UserProtocol>: Ride<T, U> {
     init(
         name: String, duration: T, timing: Timing<T>,
         ageGroup allowedAgeGroup: AgeGroup, minimumCapacity: UInt
@@ -185,7 +186,7 @@ class WaterRide<T: TimeProtocol, U: UserRideProtocol>: Ride<T, U> {
     }
 }
 
-class DryRide<T: TimeProtocol, U: UserRideProtocol>: Ride<T, U> {
+class DryRide<T: TimeProtocol, U: UserProtocol>: Ride<T, U> {
     init(
         name: String, duration: T, timing: Timing<T>, ageGroup
         allowedAgeGroup: AgeGroup, minimumCapacity: UInt

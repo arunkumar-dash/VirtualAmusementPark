@@ -8,7 +8,7 @@
 import Foundation
 /// Main entry to the amusement park.
 /// Contains instances of users entered into the park through this reception.
-struct Reception<T: TimeProtocol, U: UserRideProtocol, UR: UserRideProtocol> {
+struct Reception<T: TimeProtocol, U: UserProtocol> {
     
     /// Adds `User` objects into `checkedInUsers` set
     ///
@@ -26,14 +26,14 @@ struct Reception<T: TimeProtocol, U: UserRideProtocol, UR: UserRideProtocol> {
             /// Error handling mobile number
             while true {
                 do {
-                    user = try User<T, U, UR>(name: userName, age: userAge, mobile: mobile) as? U
-                    if Controller.getCheckedInUsers().contains(user! as! User<T, U, UR>) {
-                        throw User<T, U, UR>.Error.userAlreadyExists
+                    user = try User<T, U>(name: userName, age: userAge, mobile: mobile) as? U
+                    if Controller.getCheckedInUsers().contains(user! as! User<T, U>) {
+                        throw User<T, U>.Error.userAlreadyExists
                     }
                     user!.checkIn()
-                    Controller.addNewUser(user! as! User<T, U, UR>)
+                    Controller.addNewUser(user! as! User<T, U>)
                     break
-                } catch User<T, U, UR>.Error.invalidMobileFormat {
+                } catch User<T, U>.Error.invalidMobileFormat {
                     mobile = InputHandler.getInput("a 10-digit mobile number")
                 } catch let error {
                     Printer.printError("User check-in was unsuccessful", error: error)
@@ -82,7 +82,7 @@ struct Reception<T: TimeProtocol, U: UserRideProtocol, UR: UserRideProtocol> {
             let mobile = InputHandler.getInput("mobile")
             var tempUser: U?
             do {
-                tempUser = try User<T, U, UR>(name: name, age: 1, mobile: mobile) as? U
+                tempUser = try User<T, U>(name: name, age: 1, mobile: mobile) as? U
                 if tempUser != nil {
                     if let oldUser = Controller.removeUser(user: tempUser!) {
                         oldUser.printReceipt()
@@ -98,3 +98,4 @@ struct Reception<T: TimeProtocol, U: UserRideProtocol, UR: UserRideProtocol> {
         }
     }
 }
+

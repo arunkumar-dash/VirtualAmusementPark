@@ -12,12 +12,21 @@ enum AgeGroup {
     case adult
     case child
 }
-/// To conform to UserRideProtocol, implement`add(ride:)`, `visit(ride:)`,
+/// To conform to `IndividualUserProtocol`, implement `name`, `age`, `ageGroup`,
+/// `mobile`, `totalAmountSpent`.
+protocol IndividualUserProtocol {
+    var name: String { get }
+    var age: UInt8 { get }
+    var ageGroup: AgeGroup { get }
+    var mobile: String { get }
+    var totalAmountSpent: Float { get }
+}
+/// To conform to `UserRideProtocol`, implement`add(ride:)`, `visit(ride:)`,
 /// `getCurrentRide()`, `setCurrentRide()`, `setCurrentRide(ride:)`,
 /// `removeCurrentRide()`. `getRidesVisitedPair()`,
-protocol UserRideProtocol: UserProtocol {
+protocol UserRideProtocol {
     associatedtype T: TimeProtocol
-    associatedtype U: UserRideProtocol
+    associatedtype U: UserProtocol
     func add(ride: Ride<T, U>) throws -> Bool
     func visit(ride: Ride<T, U>) throws
     func getCurrentRide() -> Ride<T, U>?
@@ -25,17 +34,11 @@ protocol UserRideProtocol: UserProtocol {
     func removeCurrentRide()
     func getRidesVisitedPair() -> Dictionary<Ride<T, U>, Bool>
 }
-/// To conform to UserProtocol, implement `name`, `age`, `ageGroup`,
-/// `mobile`, `totalAmountSpent`, `isRiding()`, `checkIn()`, `checkOut()`,
+/// To conform to `UserProtocol`, implement `isRiding()`, `checkIn()`, `checkOut()`,
 /// `add(refreshment:)`, `canCheckOut()`, `printReceipt()`,
 /// `appendRefreshment(refreshment:)`and conform to
 /// `IndividualUserProtocol`, `UserRideProtocol` and `Hashable` protocol
-protocol UserProtocol: Hashable {
-    var name: String { get }
-    var age: UInt8 { get }
-    var ageGroup: AgeGroup { get }
-    var mobile: String { get }
-    var totalAmountSpent: Float { get }
+protocol UserProtocol: IndividualUserProtocol, UserRideProtocol, Hashable {
     func isRiding() -> Bool
     @discardableResult
     func checkIn() -> Bool
@@ -46,7 +49,7 @@ protocol UserProtocol: Hashable {
     func appendRefreshment(_ refreshment: Refreshment)
 }
 /// Returns an `User` instance
-class User<T: TimeProtocol, U: UserProtocol, UR: UserRideProtocol>: UserProtocol {
+class User<T: TimeProtocol, U: UserProtocol>: UserProtocol {
     typealias T = T
     
     typealias U = U
@@ -75,13 +78,13 @@ class User<T: TimeProtocol, U: UserProtocol, UR: UserRideProtocol>: UserProtocol
     }
     let mobile: String
     /// Dictionary to check if the user has visited the ride
-    fileprivate var rides: Dictionary<Ride<T, UR>, Bool> = [:]
+    private var rides: Dictionary<Ride<T, U>, Bool> = [:]
     /// Array consisting of `Refreshment` objects
-    fileprivate var refreshments: Array<Refreshment> = []
+    private var refreshments: Array<Refreshment> = []
     /// Helper variable which stores the status of the `User`
-    fileprivate var isInside: Bool = false
+    private var isInside: Bool = false
     /// Stores the `Ride` instance which is currently being visited by the `User`
-    fileprivate var currentRide: Ride<T, UR>?
+    private var currentRide: Ride<T, U>?
     /// Returns true if user is currently in aride, else false
     func isRiding() -> Bool {
         if getCurrentRide() == nil {
@@ -135,6 +138,25 @@ class User<T: TimeProtocol, U: UserProtocol, UR: UserRideProtocol>: UserProtocol
         isInside = false
         return true
     }
+    /// Adds a `Ride` object to the collection `rides` and returns `true` if success.
+    ///
+    /// - Parameter ride: The `Ride` object to add.
+    /// - Returns: `true` if `Ride` object is successfully added to the collection `rides`
+    /// - Throws:
+    ///   - `Error.UserError.ageGroupUnsatisfied` if age group does not satisfy.
+    ///   - `Error.UserError.rideAlreadyAdded` if ride already added.
+    @discardableResult
+    func add(ride: Ride<T, U>) throws -> Bool {
+        if ageGroup == .child && ride.allowedAgeGroup == .adult {
+            Printer.printError("Not allowed")
+            throw Error.UserError.ageGroupUnsatisfied
+        }
+        if rides.updateValue(false, forKey: ride) == nil {
+            return true
+        } else {
+            throw Error.UserError.rideAlreadyAdded
+        }
+    }
     /// Adds a `Refreshment` object to the collection `refreshments`.
     func add(refreshment: Refreshment) {
         refreshments.append(refreshment)
@@ -167,48 +189,13 @@ class User<T: TimeProtocol, U: UserProtocol, UR: UserRideProtocol>: UserProtocol
         print(String(repeating: "-", count: 20))
         print("Total:\t\t\(totalAmountSpent)")
     }
-    
-    func appendRefreshment(_ refreshment: Refreshment) {
-        refreshments.append(refreshment)
-    }
-}
-
-class User1<T: TimeProtocol, U: UserProtocol, UR: UserRideProtocol>: User<T, U, UR>, UserRideProtocol {
-    typealias U = UR
-    
-    /// Adds a `Ride` object to the collection `rides` and returns `true` if success.
-    ///
-    /// - Parameter ride: The `Ride` object to add.
-    /// - Returns: `true` if `Ride` object is successfully added to the collection `rides`
-    /// - Throws:
-    ///   - `Error.UserError.ageGroupUnsatisfied` if age group does not satisfy.
-    ///   - `Error.UserError.rideAlreadyAdded` if ride already added.
-    @discardableResult
-    func add(ride: Ride<T, UR>) throws -> Bool {
-        if ageGroup == .child && ride.allowedAgeGroup == .adult {
-            Printer.printError("Not allowed")
-            throw Error.UserError.ageGroupUnsatisfied
-        }
-        if rides.updateValue(false, forKey: ride) == nil {
-            return true
-        } else {
-            throw Error.UserError.rideAlreadyAdded
-        }
-    }
-}
-
-extension User: Equatable {
-    /// Overloaded `==` operator for two `User` objects
-    static func ==(lhs: User, rhs: User) -> Bool {
-        return lhs.name == rhs.name && lhs.mobile == rhs.mobile
-    }
     /// Marks the `Ride` object passed as a parameter as visited.
     ///
     /// - Parameter ride: `Ride` object which should be visited.
     /// - Throws:
     ///   - `RideError.rideNotFound` if ride not found.
     ///   - `RideError.alreadyVisitedRide` if ride object is already marked visited.
-    func visit(ride: Ride<T, UR>) throws {
+    func visit(ride: Ride<T, U>) throws {
         if getCurrentRide() != nil {
             dump("You are currently in \(getCurrentRide()!.name), visit after ride ends!")
             return
@@ -220,7 +207,7 @@ extension User: Equatable {
         } else {
             do {
                 // Adding user into the ride
-                try ride.add(user: U.self as! U as! UR)
+                try ride.add(user: U.self as! U)
                 // Marking the ride as visited
                 rides[ride] = true
             } catch RideError.StartError.rideClosed {
@@ -241,14 +228,14 @@ extension User: Equatable {
     /// Returns the `Ride` object which the user is currently visiting
     ///
     /// - Returns: The `Ride` object which the user is currently visiting
-    func getCurrentRide() -> Ride<T, UR>? {
+    func getCurrentRide() -> Ride<T, U>? {
         return currentRide
     }
     
     /// Updates the `currentRide` variable with the `Ride` object passed
     ///
     /// - Parameter ride: The `Ride` object to be updated with
-    func setCurrentRide(_ ride: Ride<T, UR>) {
+    func setCurrentRide(_ ride: Ride<T, U>) {
         currentRide = ride
     }
     
@@ -256,9 +243,20 @@ extension User: Equatable {
     func removeCurrentRide() {
         currentRide = nil
     }
-    /// Returns the dictionary rides
-    func getRidesVisitedPair() -> Dictionary<Ride<T, UR>, Bool> {
+    
+    func getRidesVisitedPair() -> Dictionary<Ride<T, U>, Bool> {
         return rides
+    }
+    
+    func appendRefreshment(_ refreshment: Refreshment) {
+        refreshments.append(refreshment)
+    }
+}
+
+extension User: Equatable {
+    /// Overloaded `==` operator for two `User` objects
+    static func ==(lhs: User, rhs: User) -> Bool {
+        return lhs.name == rhs.name && lhs.mobile == rhs.mobile
     }
 }
 

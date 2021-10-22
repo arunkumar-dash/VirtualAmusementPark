@@ -8,7 +8,7 @@
 import Foundation
 
 /// Returns a `RideSelector` instance
-struct RideSelector<T: TimeProtocol, U: UserRideProtocol> {
+struct RideSelector<T: TimeProtocol, U: UserProtocol> {
     /// Returns a `Ride` instance based on the ride type from input with the parameters
     ///
     /// - Parameters:

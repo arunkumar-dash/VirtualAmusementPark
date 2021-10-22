@@ -8,13 +8,15 @@
 import Foundation
 /// Returns a controller object to handle the execution of the amusement park.
 class Controller {
+    
     /// A set consisting of `User` instances.
-    private static var checkedInUsers: Set<User<Time, User>> = []
+    private static var checkedInUsers: Set<User> = []
     /// An array consisting of `User`s checked-out.
     private static var checkedOutUsers: Array<User<Time>> = []
     /// A static array consisting of rides in the park.
     private static var rides: Array<Ride<Time, User<Time>>> = []
     /// Static variable which stores the time since start of execution.
+     
     private static var currentTime: Time {
         get {
             do {
